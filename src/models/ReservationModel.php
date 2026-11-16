@@ -485,6 +485,25 @@ class ReservationModel extends Model implements ReservationInterface
         return $record && $record->delete() !== false;
     }
 
+    // Craft 6-only: craft\base\Model::validate() (Yii) has no $throw
+    // parameter, and Yii's addError() declares no return type — both need
+    // real overrides to satisfy the newly-tightened ReservationInterface
+    // (see verification/001-reservation-interface-validate-and-errors.md).
+    // getErrors()/hasErrors() already matched and needed no change.
+    public function validate($attributeNames = null, $clearErrors = true, $throw = false): bool
+    {
+        $result = parent::validate($attributeNames, $clearErrors);
+        if ($throw && !$result) {
+            throw new \yii\base\InvalidArgumentException('Validation failed: ' . json_encode($this->getErrors()));
+        }
+        return $result;
+    }
+
+    public function addError($attribute, $error = ''): void
+    {
+        parent::addError($attribute, $error);
+    }
+
     public function defineRules(): array
     {
         return array_merge(parent::defineRules(), [

@@ -48,20 +48,26 @@ interface ReservationQueryInterface
     public function withLocation(): static;
     public function withRelations(): static;
 
-    // Signatures match Yii QueryTrait (no return type declarations)
+    // Query-execution signatures, kept compatible with Craft 6 core:
+    // `ReservationQuery` inherits these from `CraftCms\Cms\Element\Queries\ElementQuery`
+    // / Laravel's query Builder contract, so the parameter types must match the core
+    // implementations (`?int` for limit/offset), and no return types are declared here
+    // because the core methods return `self`, which cannot satisfy a `static` interface
+    // return type. `sum()`, `each()`, and `andWhere()` are intentionally omitted: they
+    // aren't part of Craft 6's core query chain (andWhere exists only as an adapter
+    // mixin, which is invisible to compile-time interface checks), so declaring them
+    // here would make `ReservationQuery` fatally abstract. `ReservationModelQuery`
+    // still provides all three as concrete methods.
     public function orderBy($columns);
-    public function limit($limit);
-    public function offset($offset);
+    public function limit(?int $limit);
+    public function offset(?int $offset);
     public function one($db = null);
     public function all($db = null);
-    public function sum($q, $db = null);
-    public function count($q = '*', $db = null);
-    public function exists($db = null);
-    public function each($batchSize = 100, $db = null);
+    public function count($columns = '*'): int;
+    public function exists(): bool;
 
     /** @return int[] */
-    public function ids(?\yii\db\Connection $db = null): array;
+    public function ids(): array;
 
     public function where($condition, $params = []);
-    public function andWhere($condition, $params = []);
 }

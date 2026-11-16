@@ -205,13 +205,13 @@ class ReservationModelQuery implements ReservationQueryInterface
         return $this;
     }
 
-    public function limit($limit)
+    public function limit(?int $limit): static
     {
         $this->query->limit($limit);
         return $this;
     }
 
-    public function offset($offset)
+    public function offset(?int $offset): static
     {
         $this->query->offset($offset);
         return $this;
@@ -291,14 +291,14 @@ class ReservationModelQuery implements ReservationQueryInterface
         return $this->query->sum($q, $db);
     }
 
-    public function count($q = '*', $db = null)
+    public function count($q = '*', $db = null): int
     {
-        return $this->query->count($q, $db);
+        return (int)$this->query->count($q, $db);
     }
 
-    public function exists($db = null)
+    public function exists($db = null): bool
     {
-        return $this->query->exists($db);
+        return (bool)$this->query->exists($db);
     }
 
     public function ids(?\yii\db\Connection $db = null): array

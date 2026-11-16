@@ -1052,6 +1052,31 @@ class Reservation extends Element implements _ReservationPurchasable, Reservatio
         return Craft::$app->elements->deleteElement($this);
     }
 
+    // Craft 6-only: getErrors()/hasErrors()/addError() are no longer real
+    // declared methods on the base Element/Component — the adapter only
+    // backfills them as dynamic runtime macros (__call()-based), which
+    // satisfy a call site but never satisfy a PHP `implements` contract
+    // check at class-declaration time. ReservationInterface requires them
+    // as real methods (so callers can use either Reservation
+    // implementation polymorphically), so they're reimplemented here
+    // against the new errors(): MessageBag API, mirroring exactly what
+    // the adapter's own CraftCms\Yii2Adapter\Mixins\ValidateMixin macros do
+    // internally. Not dual-compatible: errors() doesn't exist on Craft 5.
+    public function getErrors(?string $attribute = null): array
+    {
+        return $attribute === null ? $this->errors()->getMessages() : $this->errors()->get($attribute);
+    }
+
+    public function hasErrors(?string $attribute = null): bool
+    {
+        return $attribute === null ? $this->errors()->isNotEmpty() : $this->errors()->has($attribute);
+    }
+
+    public function addError(string $attribute, string $error = ''): void
+    {
+        $this->errors()->add($attribute, $error);
+    }
+
     // PurchasableInterface (only called when Commerce is installed)
 
     public function getStore(): \craft\commerce\models\Store
