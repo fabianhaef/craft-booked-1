@@ -315,7 +315,10 @@ class Reservation extends Element implements _ReservationPurchasable, Reservatio
         return parent::eagerLoadingMap($sourceElements, $handle);
     }
 
-    public function setEagerLoadedElements(string $handle, array $elements, \craft\elements\db\EagerLoadPlan $plan): void
+    // $plan is intentionally untyped: its class moved namespaces in Craft 6,
+    // and an overriding method's parameter type can't narrow below the base
+    // class's own type, so no single type-hint satisfies both Craft 5 and 6.
+    public function setEagerLoadedElements(string $handle, array $elements, $plan): void
     {
         switch ($handle) {
             case 'service':

@@ -88,11 +88,15 @@ class BlackoutDateQuery extends ElementQuery
         return true;
     }
 
-    protected function statusCondition(string $status): mixed
+    // Craft 6-only signature: statusCondition() returns a raw condition array
+    // on Craft 5, but a Closure(Builder): Builder on Craft 6 — no single
+    // implementation satisfies both override contracts, so this branch
+    // targets 6.x exclusively (see MIGRATION_PLAN.md).
+    protected function statusCondition(string $status): \Closure
     {
         return match ($status) {
-            'active' => ['booked_blackout_dates.isActive' => true],
-            'inactive' => ['booked_blackout_dates.isActive' => false],
+            'active' => fn (\Illuminate\Database\Query\Builder $q) => $q->whereBool('booked_blackout_dates.isActive', true),
+            'inactive' => fn (\Illuminate\Database\Query\Builder $q) => $q->whereBool('booked_blackout_dates.isActive', false),
             default => parent::statusCondition($status),
         };
     }

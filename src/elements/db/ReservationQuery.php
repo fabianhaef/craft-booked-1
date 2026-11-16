@@ -159,10 +159,14 @@ class ReservationQuery extends ElementQuery implements ReservationQueryInterface
         return $this;
     }
 
-    protected function statusCondition(string $status): mixed
+    // Craft 6-only signature: statusCondition() returns a raw condition array
+    // on Craft 5, but a Closure(Builder): Builder on Craft 6 — no single
+    // implementation satisfies both override contracts, so this branch
+    // targets 6.x exclusively (see MIGRATION_PLAN.md).
+    protected function statusCondition(string $status): \Closure
     {
         return match ($status) {
-            'confirmed', 'pending', 'cancelled', 'no_show' => ['booked_reservations.status' => $status],
+            'confirmed', 'pending', 'cancelled', 'no_show' => fn (\Illuminate\Database\Query\Builder $q) => $q->where('booked_reservations.status', $status),
             default => parent::statusCondition($status),
         };
     }

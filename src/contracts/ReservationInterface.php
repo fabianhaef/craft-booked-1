@@ -124,8 +124,12 @@ interface ReservationInterface
     public function save(bool $runValidation = true): bool;
     public function delete(): bool;
 
-    // Signatures match Yii Model for Element compatibility (no return types)
-    public function validate($attributeNames = null, $clearErrors = true);
+    // Signatures match Yii Model for Element compatibility (no return types).
+    // Explicit `mixed` (not bare untyped params) because an implicitly
+    // untyped interface parameter is still narrower than Craft 6's own
+    // typed Component::validate(), which this interface must stay
+    // LSP-compatible with wherever the Element implementation is involved.
+    public function validate(mixed $attributeNames = null, mixed $clearErrors = true, mixed $throw = false): mixed;
     public function getErrors($attribute = null);
     public function hasErrors($attribute = null);
     public function addError($attribute, $error = '');

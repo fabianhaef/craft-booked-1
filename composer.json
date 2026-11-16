@@ -27,7 +27,7 @@
     ],
     "require": {
         "php": "^8.2",
-        "craftcms/cms": "^5.0",
+        "craftcms/cms": "^5.0 || ^6.0",
         "google/apiclient": "^2.0",
         "microsoft/microsoft-graph": "^1.0",
         "league/oauth2-client": "^2.0",

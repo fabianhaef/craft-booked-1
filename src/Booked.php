@@ -140,11 +140,6 @@ class Booked extends Plugin
         return Craft::t('booked', 'plugin.description');
     }
 
-    public static function getInstance(): ?self
-    {
-        return parent::getInstance();
-    }
-
     private function registerTemplateRoots(): void
     {
         $templateRoot = $this->getBasePath() . DIRECTORY_SEPARATOR . 'templates';
