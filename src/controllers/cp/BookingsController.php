@@ -271,7 +271,7 @@ class BookingsController extends Controller
                 [['value' => '', 'label' => Craft::t('booked', 'form.notEventBooking')]],
                 array_map(
                     static fn($e) => ['value' => $e->id, 'label' => "{$e->title} ({$e->eventDate})"],
-                    EventDate::find()->siteId('*')->unique()->where(['>=', 'eventDate', date('Y-m-d')])->orderBy('eventDate')->all()
+                    EventDate::find()->siteId('*')->unique()->where('eventDate', '>=', date('Y-m-d'))->orderBy('eventDate')->all()
                 )
             ),
             'timezoneOptions' => array_merge(
