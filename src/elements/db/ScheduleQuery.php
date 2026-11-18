@@ -3,7 +3,6 @@
 namespace anvildev\booked\elements\db;
 
 use craft\elements\db\ElementQuery;
-use craft\helpers\Db;
 
 /**
  * @method \anvildev\booked\elements\Schedule[]|array all($db = null)
@@ -12,6 +11,12 @@ use craft\helpers\Db;
  */
 class ScheduleQuery extends ElementQuery
 {
+    // Craft 6-only. See EmployeeQuery for the full explanation of this
+    // property and the elementQueryBeforeQuery() override below -
+    // replaces the Craft 5 beforePrepare()/joinElementTable() pattern,
+    // confirmed dead as of Craft 6.0.0 (MIGRATION_PLAN.md finding #10).
+    protected string $table = 'booked_schedules';
+
     public ?int $employeeId = null;
     /** @var string|null Date in Y-m-d format */
     public ?string $activeOn = null;
@@ -35,49 +40,56 @@ class ScheduleQuery extends ElementQuery
         return $this;
     }
 
-    protected function beforePrepare(): bool
+    // Craft 6-only. See EmployeeQuery::elementQueryBeforeQuery() for why
+    // this uses $this->query (not the now-nonexistent $subQuery) and
+    // native Laravel calls (not Db::parseParam() through andWhere()). The
+    // old two-query innerJoin (once on $subQuery for filtering, once on
+    // $query for the real select) collapses into a single join on $query.
+    // The CASE-based order replaces Craft's own default order outright
+    // (matching the old code's effect, since it also overwrote whatever
+    // default order Craft 5 had already applied by this point) - $query
+    // ->reorder() clears what parent::elementQueryBeforeQuery() just
+    // applied above, since Craft 6 only skips applying its own default
+    // order when $query already has one *before* that call runs.
+    protected function elementQueryBeforeQuery(): void
     {
-        if (!parent::beforePrepare()) {
-            return false;
-        }
+        parent::elementQueryBeforeQuery();
 
-        $t = 'booked_schedules';
-        $this->joinElementTable($t);
-
-        $this->query->addSelect(["$t.workingHours", "$t.startDate", "$t.endDate"]);
+        $this->query->addSelect([
+            'booked_schedules.workingHours', 'booked_schedules.startDate', 'booked_schedules.endDate',
+        ]);
 
         if ($this->enabled !== null) {
-            $this->subQuery->andWhere(Db::parseParam('elements.enabled', (int)$this->enabled));
+            $this->query->where('elements.enabled', (bool)$this->enabled);
         }
 
         if ($this->employeeId !== null) {
-            $joinOn = '[[assignments.scheduleId]] = [[booked_schedules.id]]';
-            $this->subQuery->innerJoin('{{%booked_employee_schedule_assignments}} assignments', $joinOn);
-            $this->subQuery->andWhere(Db::parseParam('assignments.employeeId', $this->employeeId));
-
-            $this->query->innerJoin(
-                '{{%booked_employee_schedule_assignments}} assignments',
-                "$joinOn AND [[assignments.employeeId]] = :empId",
-                [':empId' => $this->employeeId]
+            $employeeId = $this->employeeId;
+            $this->query->join(
+                'booked_employee_schedule_assignments as assignments',
+                fn($join) => $join->on('assignments.scheduleId', '=', 'booked_schedules.id')
+                    ->where('assignments.employeeId', $employeeId),
             );
             $this->query->addSelect(['assignments.sortOrder']);
 
             // Order by date specificity: both dates > one date > neither
-            $this->subQuery->orderBy([
-                new \yii\db\Expression('CASE
-                    WHEN [[booked_schedules.startDate]] IS NOT NULL AND [[booked_schedules.endDate]] IS NOT NULL THEN 1
-                    WHEN [[booked_schedules.startDate]] IS NOT NULL OR [[booked_schedules.endDate]] IS NOT NULL THEN 2
-                    ELSE 3
-                END'),
-                'assignments.sortOrder' => SORT_ASC,
-            ]);
+            $this->query->reorder();
+            $this->query->orderByRaw('CASE
+                WHEN booked_schedules.startDate IS NOT NULL AND booked_schedules.endDate IS NOT NULL THEN 1
+                WHEN booked_schedules.startDate IS NOT NULL OR booked_schedules.endDate IS NOT NULL THEN 2
+                ELSE 3
+            END');
+            $this->query->orderBy('assignments.sortOrder');
         }
 
         if ($this->activeOn !== null) {
-            $this->subQuery->andWhere(['or', ["$t.startDate" => null], ['<=', "$t.startDate", $this->activeOn]]);
-            $this->subQuery->andWhere(['or', ["$t.endDate" => null], ['>=', "$t.endDate", $this->activeOn]]);
+            $activeOn = $this->activeOn;
+            $this->query->where(
+                fn($q) => $q->whereNull('booked_schedules.startDate')->orWhere('booked_schedules.startDate', '<=', $activeOn),
+            );
+            $this->query->where(
+                fn($q) => $q->whereNull('booked_schedules.endDate')->orWhere('booked_schedules.endDate', '>=', $activeOn),
+            );
         }
-
-        return true;
     }
 }
