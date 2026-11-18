@@ -44,10 +44,11 @@ class EmployeesController extends Controller
             $employee->siteId = Craft::$app->request->getParam('siteId') ?: Craft::$app->getSites()->getCurrentSite()->id;
         }
 
+        // No need to filter out null userId values in SQL - array_filter()
+        // below already drops them once intval(null) becomes 0.
         $assignedUserIds = array_values(array_filter(array_map('intval',
             Employee::find()->siteId('*')->status(null)
-                ->andWhere(['not', ['booked_employees.userId' => null]])
-                ->select(['booked_employees.userId'])->column()
+                ->select(['booked_employees.userId'])->column(null)
         )));
 
         $managedEmployees = [];
