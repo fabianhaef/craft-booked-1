@@ -52,7 +52,15 @@ class Reservation extends Element implements _ReservationPurchasable, Reservatio
     public string $userEmail = '';
     public ?string $userPhone = null;
     public ?int $userId = null;
-    public ?string $userTimezone = null;
+    // Craft 6-only: a property hook replaces the Craft 5 init()-based
+    // default below - see Schedule::$workingHours for the full
+    // explanation (init() is never called at all under Craft 6;
+    // MIGRATION_PLAN.md finding #15).
+    public ?string $userTimezone = null {
+        set(?string $value) {
+            $this->userTimezone = $value ?: Craft::$app->getTimeZone();
+        }
+    }
     public string $bookingDate = '';
     public ?string $endDate = null;
     public ?string $startTime = '';
@@ -606,14 +614,6 @@ class Reservation extends Element implements _ReservationPurchasable, Reservatio
     public function getStatus(): ?string
     {
         return $this->status;
-    }
-
-    public function init(): void
-    {
-        parent::init();
-        if (empty($this->userTimezone)) {
-            $this->userTimezone = Craft::$app->getTimeZone();
-        }
     }
 
     public function __toString(): string

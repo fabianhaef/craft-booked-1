@@ -24,8 +24,21 @@ class Employee extends Element
     public ?int $userId = null;
     public ?int $locationId = null;
     public ?string $email = null;
-    public array|string|null $workingHours = null;
-    public array|string|null $serviceIds = null;
+    // Craft 6-only: property hooks replace the Craft 5 init()-based
+    // normalization below - see Schedule::$workingHours for the full
+    // explanation (init() is never called at all under Craft 6;
+    // MIGRATION_PLAN.md finding #15).
+    public array $workingHours = [] {
+        set(array | string | null $value) {
+            $this->workingHours = $this->normalizeWorkingHours($value);
+        }
+    }
+
+    public array $serviceIds = [] {
+        set(array | string | null $value) {
+            $this->serviceIds = is_string($value) ? (json_decode($value, true) ?? []) : ($value ?? []);
+        }
+    }
 
     private ?User $_user = null;
     private ?Location $_location = null;
@@ -179,15 +192,6 @@ class Employee extends Element
     public function canDuplicate(User $user): bool
     {
         return true;
-    }
-
-    public function init(): void
-    {
-        parent::init();
-        $this->workingHours = $this->normalizeWorkingHours($this->workingHours);
-        $this->serviceIds = is_string($this->serviceIds)
-            ? (json_decode($this->serviceIds, true) ?? [])
-            : ($this->serviceIds ?? []);
     }
 
     public function canView(User $user): bool

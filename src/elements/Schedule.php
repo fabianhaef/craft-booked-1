@@ -24,7 +24,23 @@ class Schedule extends Element
     use HasElementPermissions;
     use HasWeeklySchedule;
 
-    public array|string|null $workingHours = null;
+    // Craft 6-only: a property hook replaces the Craft 5 init()-based
+    // normalization below. init() is never called at all under Craft 6
+    // (Component::__construct() just assigns config values; it never calls
+    // a subclass's init(), and calling it manually confirms why - this
+    // class's own override opens with parent::init(), which hits the same
+    // "no real method, only a mixin, no mixin for this one either"
+    // BadMethodCallException as beforePrepare()/defineRules() before it.
+    // The set hook runs on every assignment - including Craft 6 hydrating
+    // this property from a database row, which is exactly where the bug
+    // showed up: workingHours stayed a raw JSON string, so
+    // getScheduleForDay() found nothing and the public booking wizard
+    // showed zero availability on every date (MIGRATION_PLAN.md finding #15).
+    public array $workingHours = [] {
+        set(array | string | null $value) {
+            $this->workingHours = $this->normalizeWorkingHours($value);
+        }
+    }
     public ?string $startDate = null;
     public ?string $endDate = null;
     /** Sort order from assignment (set during query, not persisted on element) */
@@ -148,12 +164,6 @@ class Schedule extends Element
     public function canDuplicate(User $user): bool
     {
         return true;
-    }
-
-    public function init(): void
-    {
-        parent::init();
-        $this->workingHours = $this->normalizeWorkingHours($this->workingHours);
     }
 
     protected function permissionKey(): string
