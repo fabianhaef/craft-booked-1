@@ -21,6 +21,8 @@ use craft\enums\Color;
 use craft\helpers\Html;
 use craft\helpers\UrlHelper;
 use craft\models\FieldLayout;
+use CraftCms\RulesetValidation\Attributes\Ruleset;
+use CraftCms\Yii2Adapter\Validation\LegacyElementRules;
 
 // Commerce is optional, so the interface Reservation implements is aliased to
 // the real PurchasableInterface when Commerce is installed and to a local shim
@@ -38,6 +40,7 @@ if (!interface_exists('anvildev\booked\elements\_ReservationPurchasable', false)
     }
 }
 
+#[Ruleset(LegacyElementRules::class)]
 class Reservation extends Element implements _ReservationPurchasable, ReservationInterface
 {
     use HasCancellationPolicy;

@@ -12,7 +12,10 @@ use craft\elements\actions\Delete;
 use craft\elements\actions\SetStatus;
 use craft\elements\User;
 use craft\helpers\Html;
+use CraftCms\RulesetValidation\Attributes\Ruleset;
+use CraftCms\Yii2Adapter\Validation\LegacyElementRules;
 
+#[Ruleset(LegacyElementRules::class)]
 class Employee extends Element
 {
     use HasEnabledStatus;

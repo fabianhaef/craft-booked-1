@@ -16,7 +16,10 @@ use craft\elements\actions\SetStatus;
 use craft\elements\User;
 use craft\helpers\Html;
 use craft\models\FieldLayout;
+use CraftCms\RulesetValidation\Attributes\Ruleset;
+use CraftCms\Yii2Adapter\Validation\LegacyElementRules;
 
+#[Ruleset(LegacyElementRules::class)]
 class Service extends Element
 {
     use HasEnabledStatus;

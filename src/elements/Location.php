@@ -11,7 +11,10 @@ use craft\base\Element;
 use craft\elements\actions\Delete;
 use craft\elements\actions\SetStatus;
 use craft\elements\User;
+use CraftCms\RulesetValidation\Attributes\Ruleset;
+use CraftCms\Yii2Adapter\Validation\LegacyElementRules;
 
+#[Ruleset(LegacyElementRules::class)]
 class Location extends Element
 {
     use HasEnabledStatus;
