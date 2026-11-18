@@ -3,6 +3,7 @@
 namespace anvildev\booked\services;
 
 use anvildev\booked\contracts\ReservationQueryInterface;
+use anvildev\booked\elements\db\ReservationQuery;
 use anvildev\booked\elements\Employee;
 use anvildev\booked\records\EmployeeManagerRecord;
 use Craft;
@@ -119,6 +120,25 @@ class PermissionService extends Component
     {
         $ids = $this->getStaffEmployeeIds();
         if ($ids === null) {
+            return $query;
+        }
+
+        // Craft 6-only: andWhere() on a ReservationQuery is a Craft 6 adapter
+        // mixin built on a condition bridge with confirmed bugs
+        // (MIGRATION_PLAN.md findings #10, #12), so this scopes through
+        // Laravel's own query builder directly instead. The Craft 5/
+        // non-Commerce ReservationModelQuery fallback is a real ActiveRecord
+        // query, unaffected by any of that, and keeps using andWhere().
+        if ($query instanceof ReservationQuery) {
+            if (empty($ids)) {
+                // Empty managed employee list — return no results rather than
+                // relying on the DB driver's handling of an empty IN().
+                $query->getQuery()->whereRaw('0 = 1');
+                return $query;
+            }
+
+            $query->getQuery()->whereIn('booked_reservations.employeeId', $ids);
+
             return $query;
         }
 

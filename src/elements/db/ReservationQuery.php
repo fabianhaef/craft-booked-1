@@ -4,9 +4,9 @@ namespace anvildev\booked\elements\db;
 
 use anvildev\booked\Booked;
 use anvildev\booked\contracts\ReservationQueryInterface;
+use anvildev\booked\validators\LegacyQueryParam;
 use Craft;
 use craft\elements\db\ElementQuery;
-use craft\helpers\Db;
 use craft\web\Application as WebApplication;
 
 /**
@@ -16,6 +16,12 @@ use craft\web\Application as WebApplication;
  */
 class ReservationQuery extends ElementQuery implements ReservationQueryInterface
 {
+    // Craft 6-only. See EmployeeQuery for the full explanation of this
+    // property - replaces the Craft 5 joinElementTable('booked_reservations')
+    // call in the old beforePrepare() override below, confirmed dead as of
+    // Craft 6.0.0 (MIGRATION_PLAN.md finding #10).
+    protected string $table = 'booked_reservations';
+
     public function init(): void
     {
         parent::init();
@@ -166,66 +172,71 @@ class ReservationQuery extends ElementQuery implements ReservationQueryInterface
     protected function statusCondition(string $status): \Closure
     {
         return match ($status) {
-            'confirmed', 'pending', 'cancelled', 'no_show' => fn (\Illuminate\Database\Query\Builder $q) => $q->where('booked_reservations.status', $status),
+            'confirmed', 'pending', 'cancelled', 'no_show' => fn(\Illuminate\Database\Query\Builder $q) => $q->where('booked_reservations.status', $status),
             default => parent::statusCondition($status),
         };
     }
 
-    protected function beforePrepare(): bool
+    // Craft 6-only. See EmployeeQuery::elementQueryBeforeQuery() for why
+    // this uses $this->query (not the now-nonexistent $subQuery) and native
+    // Laravel calls (not Db::parseParam() through andWhere()) throughout.
+    protected function elementQueryBeforeQuery(): void
     {
-        if (!parent::beforePrepare()) {
-            return false;
-        }
-
-        $t = 'booked_reservations';
-        $this->joinElementTable($t);
+        parent::elementQueryBeforeQuery();
 
         // Prevent ID collisions with other element types when AR mode IDs overlap
-        $this->subQuery->andWhere(['elements.type' => $this->elementType]);
+        $this->query->where('elements.type', $this->elementType);
 
         $this->query->addSelect([
-            "$t.userName", "$t.userEmail", "$t.userPhone", "$t.userId",
-            "$t.userTimezone", "$t.bookingDate", "$t.endDate", "$t.startTime", "$t.endTime",
-            "$t.status", "$t.notes", "$t.sessionNotes", "$t.notificationSent", "$t.confirmationToken",
-            "$t.employeeId", "$t.locationId", "$t.serviceId", "$t.quantity",
-            "$t.virtualMeetingUrl", "$t.virtualMeetingProvider", "$t.virtualMeetingId",
-            "$t.googleEventId", "$t.outlookEventId",
-            "$t.emailReminder24hSent", "$t.emailReminder1hSent",
-            "$t.smsReminder24hSent", "$t.eventDateId",
-            "$t.smsConfirmationSent", "$t.smsCancellationSent",
-            "$t.smsDeliveryStatus", "$t.smsConfirmationSentAt",
-            "$t.siteId AS bookingSiteId",
+            'booked_reservations.userName', 'booked_reservations.userEmail', 'booked_reservations.userPhone',
+            'booked_reservations.userId', 'booked_reservations.userTimezone', 'booked_reservations.bookingDate',
+            'booked_reservations.endDate', 'booked_reservations.startTime', 'booked_reservations.endTime',
+            'booked_reservations.status', 'booked_reservations.notes', 'booked_reservations.sessionNotes',
+            'booked_reservations.notificationSent', 'booked_reservations.confirmationToken',
+            'booked_reservations.employeeId', 'booked_reservations.locationId', 'booked_reservations.serviceId',
+            'booked_reservations.quantity', 'booked_reservations.virtualMeetingUrl',
+            'booked_reservations.virtualMeetingProvider', 'booked_reservations.virtualMeetingId',
+            'booked_reservations.googleEventId', 'booked_reservations.outlookEventId',
+            'booked_reservations.emailReminder24hSent', 'booked_reservations.emailReminder1hSent',
+            'booked_reservations.smsReminder24hSent', 'booked_reservations.eventDateId',
+            'booked_reservations.smsConfirmationSent', 'booked_reservations.smsCancellationSent',
+            'booked_reservations.smsDeliveryStatus', 'booked_reservations.smsConfirmationSentAt',
+            'booked_reservations.siteId as bookingSiteId',
         ]);
 
-        // Simple param filters (string keys map property name => column name)
-        foreach (['userName', 'userEmail', 'userPhone', 'userId', 'endDate', 'startTime', 'endTime', 'reservationStatus' => 'status', 'employeeId', 'locationId', 'serviceId', 'eventDateId'] as $key => $col) {
-            $prop = is_int($key) ? $col : $key;
-            if ($this->$prop !== null) {
-                $this->subQuery->andWhere(Db::parseParam("$t.$col", $this->$prop));
-            }
+        // Simple param filters (property name => column name)
+        foreach ([
+            'userName' => 'userName', 'userEmail' => 'userEmail', 'userPhone' => 'userPhone',
+            'userId' => 'userId', 'endDate' => 'endDate', 'startTime' => 'startTime', 'endTime' => 'endTime',
+            'reservationStatus' => 'status',
+            'employeeId' => 'employeeId', 'locationId' => 'locationId', 'serviceId' => 'serviceId',
+            'eventDateId' => 'eventDateId',
+        ] as $prop => $col) {
+            LegacyQueryParam::apply($this->query, "booked_reservations.$col", $this->$prop);
         }
 
-        if ($this->confirmationToken !== null) {
-            $this->subQuery->andWhere(Db::parseParam("$t.confirmationToken", $this->confirmationToken));
-        }
+        LegacyQueryParam::apply($this->query, 'booked_reservations.confirmationToken', $this->confirmationToken);
 
         // Current user: match by userId OR email (legacy bookings)
         if ($this->_forCurrentUser) {
             $currentUser = Craft::$app->getUser()->getIdentity();
-            $this->subQuery->andWhere($currentUser
-                ? ['or', ["$t.userId" => $currentUser->id], ["$t.userEmail" => $currentUser->email]]
-                : '1 = 0'
-            );
+
+            if ($currentUser) {
+                $this->query->where(
+                    fn($q) => $q->where('booked_reservations.userId', $currentUser->id)
+                        ->orWhere('booked_reservations.userEmail', $currentUser->email),
+                );
+            } else {
+                $this->query->whereRaw('1 = 0');
+            }
         }
 
         // Booking date supports operator pairs, 'and' compound conditions, and simple values
         if ($this->bookingDate) {
-            $this->_applyBookingDateFilter($t);
+            $this->_applyBookingDateFilter();
         }
 
         $this->_applyStaffScope();
-
-        return true;
     }
 
     /**
@@ -267,38 +278,36 @@ class ReservationQuery extends ElementQuery implements ReservationQueryInterface
 
         $user = Craft::$app->getUser()->getIdentity();
         if ($user === null || !$user->can('booked-viewBookings')) {
-            $this->subQuery->andWhere('0=1');
+            $this->query->whereRaw('0 = 1');
             return;
         }
 
         Booked::getInstance()?->getPermission()->scopeReservationQuery($this);
     }
 
-    private function _applyBookingDateFilter(string $t): void
+    private function _applyBookingDateFilter(): void
     {
-        if (!is_array($this->bookingDate)) {
-            $this->subQuery->andWhere(Db::parseParam("$t.bookingDate", $this->bookingDate));
+        $bd = $this->bookingDate;
+
+        if (!is_array($bd)) {
+            LegacyQueryParam::apply($this->query, 'booked_reservations.bookingDate', $bd);
             return;
         }
 
-        $bd = $this->bookingDate;
-
         // Operator format: ['>', '2024-01-01']
-        if (count($bd) === 2 && is_string($bd[0]) && in_array($bd[0], ['>', '<', '>=', '<=', '!=', '<>'])) {
-            $this->subQuery->andWhere([$bd[0], "$t.bookingDate", $bd[1]]);
+        if (count($bd) === 2 && is_string($bd[0]) && in_array($bd[0], ['>', '<', '>=', '<=', '!=', '<>'], true)) {
+            $this->query->where('booked_reservations.bookingDate', $bd[0], $bd[1]);
             return;
         }
 
         // Compound: ['and', '>= 2026-02-01', '<= 2026-02-28']
         if (($bd[0] ?? null) === 'and') {
-            $conditions = ['and'];
             foreach (array_slice($bd, 1) as $condition) {
-                $conditions[] = Db::parseParam("$t.bookingDate", $condition);
+                LegacyQueryParam::apply($this->query, 'booked_reservations.bookingDate', $condition);
             }
-            $this->subQuery->andWhere($conditions);
             return;
         }
 
-        $this->subQuery->andWhere(Db::parseParam("$t.bookingDate", $bd));
+        LegacyQueryParam::apply($this->query, 'booked_reservations.bookingDate', $bd);
     }
 }
