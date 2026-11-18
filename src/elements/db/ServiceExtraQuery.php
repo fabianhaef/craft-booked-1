@@ -3,10 +3,15 @@
 namespace anvildev\booked\elements\db;
 
 use craft\elements\db\ElementQuery;
-use craft\helpers\Db;
 
 class ServiceExtraQuery extends ElementQuery
 {
+    // Craft 6-only. See EmployeeQuery for the full explanation of this
+    // property and the elementQueryBeforeQuery() override below -
+    // replaces the Craft 5 beforePrepare()/joinElementTable() pattern,
+    // confirmed dead as of Craft 6.0.0 (MIGRATION_PLAN.md finding #10).
+    protected string $table = 'booked_service_extras';
+
     public ?float $price = null;
     public ?int $duration = null;
     public ?int $maxQuantity = null;
@@ -36,26 +41,27 @@ class ServiceExtraQuery extends ElementQuery
         return $this;
     }
 
-    protected function beforePrepare(): bool
+    // Craft 6-only. See EmployeeQuery::elementQueryBeforeQuery() for why
+    // this uses $this->query (not the now-nonexistent $subQuery) and
+    // Laravel's own where() (not Db::parseParam() through andWhere()).
+    protected function elementQueryBeforeQuery(): void
     {
-        if (!parent::beforePrepare()) {
-            return false;
-        }
-
-        $t = 'booked_service_extras';
-        $this->joinElementTable($t);
+        parent::elementQueryBeforeQuery();
 
         $this->query->addSelect([
-            "$t.propagationMethod", "$t.price", "$t.duration",
-            "$t.maxQuantity", "$t.isRequired", "$t.description",
+            'booked_service_extras.propagationMethod', 'booked_service_extras.price',
+            'booked_service_extras.duration', 'booked_service_extras.maxQuantity',
+            'booked_service_extras.isRequired', 'booked_service_extras.description',
         ]);
 
-        foreach (['price', 'duration', 'maxQuantity', 'isRequired'] as $param) {
+        foreach (['price', 'duration', 'maxQuantity'] as $param) {
             if ($this->$param !== null) {
-                $this->subQuery->andWhere(Db::parseParam("$t.$param", $this->$param));
+                $this->query->where("booked_service_extras.$param", $this->$param);
             }
         }
 
-        return true;
+        if ($this->isRequired !== null) {
+            $this->query->where('booked_service_extras.isRequired', (bool)$this->isRequired);
+        }
     }
 }
