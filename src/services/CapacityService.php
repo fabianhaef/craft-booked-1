@@ -3,6 +3,7 @@
 namespace anvildev\booked\services;
 
 use anvildev\booked\Booked;
+use anvildev\booked\elements\db\ReservationQuery;
 use anvildev\booked\elements\Employee;
 use anvildev\booked\elements\Schedule;
 use anvildev\booked\factories\ReservationFactory;
@@ -205,6 +206,38 @@ class CapacityService extends Component
             ->siteId('*')
             ->bookingDate($date)
             ->status(self::SEAT_HOLDING_STATUSES);
+
+        // Craft 6-only branch below: on ReservationQuery (Element mode),
+        // andWhere() with a null-valued hash condition hits the adapter's
+        // confirmed empty-bound-params SQL corruption bug
+        // (MIGRATION_PLAN.md findings #10, #12), and sum() with a Yii-style
+        // '[[column]]'-bracketed argument is a real, native Laravel
+        // passthrough now - it doesn't resolve the brackets the way Yii's
+        // own query builder does, so they end up as literal, invalid SQL.
+        // ReservationModelQuery (the Craft 5/non-Commerce fallback) is a
+        // real ActiveQuery, unaffected by either problem, and keeps using
+        // andWhere()/the bracketed sum() as before.
+        if ($query instanceof ReservationQuery) {
+            if ($employeeId !== null) {
+                $query->employeeId($employeeId);
+            } else {
+                $query->getQuery()->whereNull('booked_reservations.employeeId');
+            }
+            if ($serviceId !== null) {
+                $query->serviceId($serviceId);
+            }
+            if ($excludeReservationId !== null) {
+                $query->getQuery()->where('booked_reservations.id', '!=', $excludeReservationId);
+            }
+
+            // Overlap condition: booking.startTime < endTime AND booking.endTime > startTime
+            $normalizedStart = substr($startTime, 0, 5);
+            $normalizedEnd = substr($endTime, 0, 5);
+            $query->getQuery()->where('booked_reservations.startTime', '<', $normalizedEnd);
+            $query->getQuery()->where('booked_reservations.endTime', '>', $normalizedStart);
+
+            return (int) $query->getQuery()->sum('booked_reservations.quantity');
+        }
 
         $employeeId !== null ? $query->employeeId($employeeId) : $query->andWhere(['employeeId' => null]);
         if ($serviceId !== null) {
