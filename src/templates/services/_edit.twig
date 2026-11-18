@@ -309,7 +309,7 @@
         errors: service.getErrors('cancellationPolicyHours'),
         size: 10,
         unit: 'labels.hoursUnit'|t('booked'),
-        placeholder: settings.cancellationPolicyHours ?? 24
+        placeholder: (settings.cancellationPolicyHours ?? 24)|string
     }) }}
 	</div>
 
