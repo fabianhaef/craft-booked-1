@@ -3,7 +3,6 @@
 namespace anvildev\booked\elements\db;
 
 use craft\elements\db\ElementQuery;
-use craft\helpers\Db;
 
 /**
  * @method \anvildev\booked\elements\BlackoutDate[]|array all($db = null)
@@ -12,6 +11,12 @@ use craft\helpers\Db;
  */
 class BlackoutDateQuery extends ElementQuery
 {
+    // Craft 6-only. See EmployeeQuery for the full explanation of this
+    // property and the elementQueryBeforeQuery() override below -
+    // replaces the Craft 5 beforePrepare()/joinElementTable() pattern,
+    // confirmed dead as of Craft 6.0.0 (MIGRATION_PLAN.md finding #10).
+    protected string $table = 'booked_blackout_dates';
+
     public ?string $startDate = null;
     public ?string $endDate = null;
     public ?bool $isActive = null;
@@ -48,44 +53,45 @@ class BlackoutDateQuery extends ElementQuery
         return $this;
     }
 
-    protected function beforePrepare(): bool
+    // Craft 6-only. See EmployeeQuery::elementQueryBeforeQuery() for why
+    // this uses $this->query (not the now-nonexistent $subQuery) and
+    // Laravel's own where()/whereIn() (not Db::parseParam() through
+    // andWhere()). The junction-table subqueries are rebuilt as native
+    // Laravel subquery closures for the same reason: a Yii \craft\db\Query
+    // passed as the 'in' operand would have to be translated by the same
+    // buggy adapter bridge that corrupted SQL twice already (findings #10
+    // and #12).
+    protected function elementQueryBeforeQuery(): void
     {
-        if (!parent::beforePrepare()) {
-            return false;
-        }
+        parent::elementQueryBeforeQuery();
 
-        $t = 'booked_blackout_dates';
-        $this->joinElementTable($t);
-
-        $this->query->addSelect(["$t.startDate", "$t.endDate", "$t.isActive"]);
+        $this->query->addSelect([
+            'booked_blackout_dates.startDate', 'booked_blackout_dates.endDate', 'booked_blackout_dates.isActive',
+        ]);
 
         foreach (['startDate', 'endDate'] as $param) {
             if ($this->$param !== null) {
-                $this->subQuery->andWhere(Db::parseParam("$t.$param", $this->$param));
+                $this->query->where("booked_blackout_dates.$param", $this->$param);
             }
         }
 
         if ($this->isActive !== null) {
-            $this->subQuery->andWhere(Db::parseParam("$t.isActive", (int) $this->isActive));
+            $this->query->where('booked_blackout_dates.isActive', (bool)$this->isActive);
         }
 
         // Filter by location/employee via junction tables
         foreach ([
-            'locationId' => ['booked_blackout_dates_locations', 'locationId', 'blackoutDateId'],
-            'employeeId' => ['booked_blackout_dates_employees', 'employeeId', 'blackoutDateId'],
-        ] as $prop => [$junctionTable, $fk, $pk]) {
+            'locationId' => ['booked_blackout_dates_locations', 'locationId'],
+            'employeeId' => ['booked_blackout_dates_employees', 'employeeId'],
+        ] as $prop => [$junctionTable, $fk]) {
             if ($this->$prop !== null) {
-                $this->subQuery->andWhere([
-                    'in', 'elements.id',
-                    (new \craft\db\Query())
-                        ->select([$pk])
-                        ->from("{{%$junctionTable}}")
-                        ->where(['in', $fk, (array)$this->$prop]),
-                ]);
+                $values = (array)$this->$prop;
+                $this->query->whereIn(
+                    'elements.id',
+                    fn($query) => $query->select('blackoutDateId')->from($junctionTable)->whereIn($fk, $values),
+                );
             }
         }
-
-        return true;
     }
 
     // Craft 6-only signature: statusCondition() returns a raw condition array
@@ -95,8 +101,8 @@ class BlackoutDateQuery extends ElementQuery
     protected function statusCondition(string $status): \Closure
     {
         return match ($status) {
-            'active' => fn (\Illuminate\Database\Query\Builder $q) => $q->whereBool('booked_blackout_dates.isActive', true),
-            'inactive' => fn (\Illuminate\Database\Query\Builder $q) => $q->whereBool('booked_blackout_dates.isActive', false),
+            'active' => fn(\Illuminate\Database\Query\Builder $q) => $q->whereBool('booked_blackout_dates.isActive', true),
+            'inactive' => fn(\Illuminate\Database\Query\Builder $q) => $q->whereBool('booked_blackout_dates.isActive', false),
             default => parent::statusCondition($status),
         };
     }
