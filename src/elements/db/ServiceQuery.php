@@ -3,7 +3,6 @@
 namespace anvildev\booked\elements\db;
 
 use craft\elements\db\ElementQuery;
-use craft\helpers\Db;
 
 /**
  * @method \anvildev\booked\elements\Service[]|array all($db = null)
@@ -12,6 +11,12 @@ use craft\helpers\Db;
  */
 class ServiceQuery extends ElementQuery
 {
+    // Craft 6-only. See EmployeeQuery for the full explanation of this
+    // property and the elementQueryBeforeQuery() override below -
+    // replaces the Craft 5 beforePrepare()/joinElementTable() pattern,
+    // confirmed dead as of Craft 6.0.0 (MIGRATION_PLAN.md finding #10).
+    protected string $table = 'booked_services';
+
     public ?int $duration = null;
     public ?float $price = null;
     public ?string $durationType = null;
@@ -57,50 +62,51 @@ class ServiceQuery extends ElementQuery
         return $this;
     }
 
-    protected function beforePrepare(): bool
+    // Craft 6-only. See EmployeeQuery::elementQueryBeforeQuery() for why
+    // this uses $this->query (not the now-nonexistent $subQuery) and
+    // native Laravel calls (not Db::parseParam() through andWhere()). The
+    // old ['is not', 'booked_services.id', null] check is dropped: under
+    // Craft 6, booked_services is the query's own base FROM table (not
+    // left-joined to it), so every row the query can even produce already
+    // has a non-null booked_services.id by construction - the join itself
+    // now enforces what that condition used to check for.
+    protected function elementQueryBeforeQuery(): void
     {
-        if (!parent::beforePrepare()) {
-            return false;
-        }
-
-        $t = 'booked_services';
-        $this->joinElementTable($t);
-        $this->subQuery->andWhere(['is not', "$t.id", null]);
+        parent::elementQueryBeforeQuery();
 
         $this->query->addSelect([
-            "$t.propagationMethod", "$t.description", "$t.duration", "$t.bufferBefore", "$t.bufferAfter",
-            "$t.price", "$t.allowCancellation", "$t.cancellationPolicyHours", "$t.allowRefund", "$t.refundTiers", "$t.virtualMeetingProvider", "$t.minTimeBeforeBooking",
-            "$t.durationType", "$t.pricingMode", "$t.minDays", "$t.maxDays",
-            "$t.timeSlotLength", "$t.availabilitySchedule",
-            "$t.customerLimitEnabled", "$t.customerLimitCount",
-            "$t.customerLimitPeriod", "$t.customerLimitPeriodType", "$t.enableWaitlist",
-            "$t.taxCategoryId", "$t.deletedAt", "$t.reservationFieldLayoutId",
+            'booked_services.propagationMethod', 'booked_services.description', 'booked_services.duration',
+            'booked_services.bufferBefore', 'booked_services.bufferAfter', 'booked_services.price',
+            'booked_services.allowCancellation', 'booked_services.cancellationPolicyHours',
+            'booked_services.allowRefund', 'booked_services.refundTiers', 'booked_services.virtualMeetingProvider',
+            'booked_services.minTimeBeforeBooking', 'booked_services.durationType', 'booked_services.pricingMode',
+            'booked_services.minDays', 'booked_services.maxDays', 'booked_services.timeSlotLength',
+            'booked_services.availabilitySchedule', 'booked_services.customerLimitEnabled',
+            'booked_services.customerLimitCount', 'booked_services.customerLimitPeriod',
+            'booked_services.customerLimitPeriodType', 'booked_services.enableWaitlist',
+            'booked_services.taxCategoryId', 'booked_services.deletedAt', 'booked_services.reservationFieldLayoutId',
         ]);
 
         foreach (['duration', 'price', 'durationType', 'minDays', 'maxDays'] as $param) {
             if ($this->$param !== null) {
-                $this->subQuery->andWhere(Db::parseParam("$t.$param", $this->$param));
+                $this->query->where("booked_services.$param", $this->$param);
             }
         }
 
         if ($this->enabled !== null) {
-            $this->subQuery->andWhere(Db::parseParam('elements.enabled', (int)$this->enabled));
+            $this->query->where('elements.enabled', (bool)$this->enabled);
         }
 
         if (!$this->withTrashed) {
-            $this->subQuery->andWhere(["$t.deletedAt" => null]);
+            $this->query->whereNull('booked_services.deletedAt');
         }
 
         if ($this->locationId !== null) {
-            $this->subQuery->andWhere([
-                'in', 'elements.id',
-                (new \craft\db\Query())
-                    ->select(['serviceId'])
-                    ->from('{{%booked_service_locations}}')
-                    ->where(['in', 'locationId', (array) $this->locationId]),
-            ]);
+            $values = (array)$this->locationId;
+            $this->query->whereIn(
+                'elements.id',
+                fn($query) => $query->select('serviceId')->from('booked_service_locations')->whereIn('locationId', $values),
+            );
         }
-
-        return true;
     }
 }
