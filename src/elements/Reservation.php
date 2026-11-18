@@ -13,6 +13,7 @@ use anvildev\booked\traits\HasCancellationPolicy;
 use anvildev\booked\traits\HasFormattedDateTime;
 use anvildev\booked\traits\HasMultiDaySupport;
 use anvildev\booked\traits\ValidatesTimeRange;
+use anvildev\booked\validators\LegacyElementRules;
 use Craft;
 use craft\base\Element;
 use craft\elements\actions\Delete;
@@ -22,7 +23,6 @@ use craft\helpers\Html;
 use craft\helpers\UrlHelper;
 use craft\models\FieldLayout;
 use CraftCms\RulesetValidation\Attributes\Ruleset;
-use CraftCms\Yii2Adapter\Validation\LegacyElementRules;
 
 // Commerce is optional, so the interface Reservation implements is aliased to
 // the real PurchasableInterface when Commerce is installed and to a local shim
@@ -530,7 +530,7 @@ class Reservation extends Element implements _ReservationPurchasable, Reservatio
 
     protected function defineRules(): array
     {
-        return array_merge(parent::defineRules(), [
+        return [
             [['userName', 'userEmail', 'bookingDate'], 'required'],
             [['startTime', 'endTime'], 'required', 'when' => fn($model) => !$model->isMultiDay()],
             [['endDate'], ValidationHelper::DATE_VALIDATOR, 'format' => ValidationHelper::DATE_FORMAT, 'when' => fn($model) => $model->endDate !== null && $model->endDate !== ''],
@@ -555,7 +555,7 @@ class Reservation extends Element implements _ReservationPurchasable, Reservatio
             [['userId'], 'integer'],
             // Custom validation: Employee-Location consistency
             ['locationId', 'validateEmployeeAndLocationExist'],
-        ]);
+        ];
     }
 
     protected function validateBookingDate(): void

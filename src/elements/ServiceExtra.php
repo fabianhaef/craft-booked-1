@@ -8,6 +8,7 @@ use anvildev\booked\records\ServiceExtraServiceRecord;
 use anvildev\booked\traits\HasElementPermissions;
 use anvildev\booked\traits\HasEnabledStatus;
 use anvildev\booked\traits\HasPropagation;
+use anvildev\booked\validators\LegacyElementRules;
 use Craft;
 use craft\base\Element;
 use craft\elements\actions\Delete;
@@ -15,7 +16,6 @@ use craft\elements\actions\Duplicate;
 use craft\elements\actions\SetStatus;
 use craft\elements\User;
 use CraftCms\RulesetValidation\Attributes\Ruleset;
-use CraftCms\Yii2Adapter\Validation\LegacyElementRules;
 
 #[Ruleset(LegacyElementRules::class)]
 class ServiceExtra extends Element
@@ -127,7 +127,7 @@ class ServiceExtra extends Element
 
     protected function defineRules(): array
     {
-        return array_merge(parent::defineRules(), [
+        return [
             [['title'], 'required'],
             [['title'], 'string', 'max' => 255],
             [['description'], 'string'],
@@ -135,7 +135,7 @@ class ServiceExtra extends Element
             [['duration'], 'integer', 'min' => 0],
             [['maxQuantity'], 'integer', 'min' => 0],
             [['isRequired'], 'boolean'],
-        ]);
+        ];
     }
 
     public function afterSave(bool $isNew): void
@@ -233,5 +233,31 @@ class ServiceExtra extends Element
     {
         ServiceExtraRecord::findOne($this->id)?->delete();
         parent::afterDelete();
+    }
+
+    // Craft 6-only: getErrors()/hasErrors()/addError() are no longer real
+    // declared methods on the base Element/Component — the adapter only
+    // backfills them as dynamic runtime macros (__call()-based). The legacy
+    // defineRules() validation bridge
+    // (anvildev\booked\validators\LegacyElementRules) checks method_exists()
+    // before forwarding a validator's errors, which is blind to
+    // __call()-based macros — so without a real override here, every
+    // defineRules() validation error on this element is silently swallowed.
+    // Mirrors Reservation's own override, added for an unrelated reason
+    // (ReservationInterface's `implements` check) in an earlier fix.
+    // Not dual-compatible: errors() doesn't exist on Craft 5.
+    public function getErrors(?string $attribute = null): array
+    {
+        return $attribute === null ? $this->errors()->getMessages() : $this->errors()->get($attribute);
+    }
+
+    public function hasErrors(?string $attribute = null): bool
+    {
+        return $attribute === null ? $this->errors()->isNotEmpty() : $this->errors()->has($attribute);
+    }
+
+    public function addError(string $attribute, string $error = ''): void
+    {
+        $this->errors()->add($attribute, $error);
     }
 }

@@ -5,13 +5,13 @@ namespace anvildev\booked\elements;
 use anvildev\booked\elements\db\BlackoutDateQuery;
 use anvildev\booked\records\BlackoutDateRecord;
 use anvildev\booked\traits\HasElementPermissions;
+use anvildev\booked\validators\LegacyElementRules;
 use Craft;
 use craft\base\Element;
 use craft\elements\actions\Delete;
 use craft\elements\User;
 use craft\helpers\Html;
 use CraftCms\RulesetValidation\Attributes\Ruleset;
-use CraftCms\Yii2Adapter\Validation\LegacyElementRules;
 
 #[Ruleset(LegacyElementRules::class)]
 class BlackoutDate extends Element
@@ -190,12 +190,12 @@ class BlackoutDate extends Element
 
     protected function defineRules(): array
     {
-        return array_merge(parent::defineRules(), [
+        return [
             [['startDate', 'endDate'], 'required'],
             [['startDate', 'endDate'], 'date', 'format' => 'php:Y-m-d'],
             [['endDate'], 'validateEndDateAfterStart'],
             [['isActive'], 'boolean'],
-        ]);
+        ];
     }
 
     public function validateEndDateAfterStart(string $attribute): void
@@ -359,5 +359,31 @@ class BlackoutDate extends Element
             default:
                 parent::setEagerLoadedElements($handle, $elements, $plan);
         }
+    }
+
+    // Craft 6-only: getErrors()/hasErrors()/addError() are no longer real
+    // declared methods on the base Element/Component — the adapter only
+    // backfills them as dynamic runtime macros (__call()-based). The legacy
+    // defineRules() validation bridge
+    // (anvildev\booked\validators\LegacyElementRules) checks method_exists()
+    // before forwarding a validator's errors, which is blind to
+    // __call()-based macros — so without a real override here, every
+    // defineRules() validation error on this element is silently swallowed.
+    // Mirrors Reservation's own override, added for an unrelated reason
+    // (ReservationInterface's `implements` check) in an earlier fix.
+    // Not dual-compatible: errors() doesn't exist on Craft 5.
+    public function getErrors(?string $attribute = null): array
+    {
+        return $attribute === null ? $this->errors()->getMessages() : $this->errors()->get($attribute);
+    }
+
+    public function hasErrors(?string $attribute = null): bool
+    {
+        return $attribute === null ? $this->errors()->isNotEmpty() : $this->errors()->has($attribute);
+    }
+
+    public function addError(string $attribute, string $error = ''): void
+    {
+        $this->errors()->add($attribute, $error);
     }
 }
