@@ -36,6 +36,7 @@ class EventDateTools
     )]
     #[McpToolMeta(category: ToolCategory::PLUGIN)]
     #[RequiresPermission('booked-accessPlugin')]
+    #[\CraftCms\Cms\Mcp\Attributes\RequiresPermission('booked-accessPlugin')]
     public function listEventDates(?string $fromDate = null, ?string $toDate = null, int $limit = 50, int $offset = 0): array
     {
         return $this->guard(function() use ($fromDate, $toDate, $limit, $offset): array {
@@ -66,6 +67,7 @@ class EventDateTools
     )]
     #[McpToolMeta(category: ToolCategory::PLUGIN)]
     #[RequiresPermission('booked-accessPlugin')]
+    #[\CraftCms\Cms\Mcp\Attributes\RequiresPermission('booked-accessPlugin')]
     public function getEventDate(int $id): array
     {
         return $this->guard(function() use ($id): array {
@@ -107,6 +109,7 @@ class EventDateTools
     )]
     #[McpToolMeta(category: ToolCategory::PLUGIN, dangerous: true)]
     #[RequiresPermission('booked-accessPlugin')]
+    #[\CraftCms\Cms\Mcp\Attributes\RequiresPermission('booked-accessPlugin')]
     public function createEventDate(
         string $title,
         string $eventDate,
@@ -163,6 +166,7 @@ class EventDateTools
     )]
     #[McpToolMeta(category: ToolCategory::PLUGIN, dangerous: true)]
     #[RequiresPermission('booked-accessPlugin')]
+    #[\CraftCms\Cms\Mcp\Attributes\RequiresPermission('booked-accessPlugin')]
     public function updateEventDate(
         int $id,
         ?string $title = null,
@@ -213,6 +217,7 @@ class EventDateTools
     )]
     #[McpToolMeta(category: ToolCategory::PLUGIN, dangerous: true)]
     #[RequiresPermission('booked-accessPlugin')]
+    #[\CraftCms\Cms\Mcp\Attributes\RequiresPermission('booked-accessPlugin')]
     public function deleteEventDate(int $id): array
     {
         return $this->guardWrite(static fn(): array => [

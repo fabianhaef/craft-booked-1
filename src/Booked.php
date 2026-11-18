@@ -150,20 +150,23 @@ class Booked extends Plugin
     }
 
     /**
-     * Register Booked's tools with Craft 5.12's built-in MCP server and, when
-     * it is installed, with stimmt/craft-mcp. Both are soft dependencies.
+     * Register Booked's tools with Craft's built-in MCP server (5.12's
+     * event-based one, or Craft 6's service-provider-based one) and, when
+     * it is installed, with stimmt/craft-mcp. All are soft dependencies.
      */
     private function registerMcpTools(): void
     {
         $this->registerCraftMcpTools();
+        $this->registerCraftSixMcpTools();
         $this->registerStimmtMcpTools();
     }
 
     /**
-     * Registers the existing tool classes with Craft's MCP server (5.12+).
-     * Absent on older Craft, so the class_exists() guard keeps those installs
-     * unchanged. Write tools stay hidden unless the install has opted in, the
-     * same switches guardWrite() already enforces when a tool is called.
+     * Registers the existing tool classes with Craft 5.12's MCP server.
+     * Absent on Craft 6 and older Craft, so the class_exists() guard keeps
+     * those installs unchanged. Write tools stay hidden unless the install
+     * has opted in, the same switches guardWrite() already enforces when a
+     * tool is called.
      */
     private function registerCraftMcpTools(): void
     {
@@ -218,6 +221,73 @@ class Booked extends Plugin
             \craft\mcp\AdminInstructions::class,
             \craft\mcp\AdminInstructions::EVENT_COLLECT_INSTRUCTIONS,
             static function(\craft\mcp\events\CollectingAdminInstructions $event): void {
+                $event->instructions[] = 'Use the booked_* tools to read the catalog, availability, reservations, schedules, and reports. Writes stay hidden until MCP write operations are enabled in Booked’s settings, and refunds stay hidden until MCP refunds are enabled too.';
+            },
+        );
+    }
+
+    /**
+     * Registers the same tool classes with Craft 6's native MCP server.
+     *
+     * Craft 6 moved this from Yii-style events to a service-provider style:
+     * a singleton CapabilityRegistry with a register() method instead of an
+     * EVENT_REGISTER_CAPABILITY_TYPES event, resolved straight from the
+     * container since Booked's own plugin class isn't itself a Laravel
+     * ServiceProvider with a container-injected boot() hook. The two
+     * remaining hooks (capability visibility, admin instructions) are still
+     * events, but Laravel ones dispatched via the global event() helper, not
+     * Yii ones — so they need Illuminate's Event facade, not the yii\base\Event
+     * this file already imports for the Craft 5.12 path above and Craft's own
+     * (still-real, still-Yii) Gql events elsewhere in this class.
+     * MIGRATION_PLAN.md finding #17.
+     */
+    private function registerCraftSixMcpTools(): void
+    {
+        if (!class_exists(\CraftCms\Cms\Mcp\CapabilityRegistry::class)) {
+            return;
+        }
+
+        app(\CraftCms\Cms\Mcp\CapabilityRegistry::class)->register(
+            \anvildev\booked\mcp\CatalogTools::class,
+            \anvildev\booked\mcp\AvailabilityTools::class,
+            \anvildev\booked\mcp\ReservationTools::class,
+            \anvildev\booked\mcp\EventDateTools::class,
+            \anvildev\booked\mcp\ScheduleTools::class,
+            \anvildev\booked\mcp\BlackoutDateTools::class,
+            \anvildev\booked\mcp\ServiceExtraTools::class,
+            \anvildev\booked\mcp\ReportTools::class,
+            \anvildev\booked\mcp\WaitlistTools::class,
+        );
+
+        \Illuminate\Support\Facades\Event::listen(
+            \CraftCms\Cms\Mcp\Events\DiscoveringCapability::class,
+            static function(\CraftCms\Cms\Mcp\Events\DiscoveringCapability $event): void {
+                $reference = $event->reference;
+                if (!$reference instanceof \Mcp\Capability\Registry\ToolReference) {
+                    return;
+                }
+                $name = $reference->tool->name;
+                if (!str_starts_with($name, 'booked_')) {
+                    return;
+                }
+                $settings = self::getInstance()->getSettings();
+                if ($name === 'booked_refund_reservation' && !$settings->mcpAllowRefunds) {
+                    $event->allowed = false;
+                    return;
+                }
+                if ($reference->tool->annotations?->destructiveHint === true && !$settings->mcpWriteEnabled) {
+                    $event->allowed = false;
+                }
+            },
+        );
+
+        if (!class_exists(\CraftCms\Cms\Mcp\AdminInstructions::class)) {
+            return;
+        }
+
+        \Illuminate\Support\Facades\Event::listen(
+            \CraftCms\Cms\Mcp\Events\CollectingAdminInstructions::class,
+            static function(\CraftCms\Cms\Mcp\Events\CollectingAdminInstructions $event): void {
                 $event->instructions[] = 'Use the booked_* tools to read the catalog, availability, reservations, schedules, and reports. Writes stay hidden until MCP write operations are enabled in Booked’s settings, and refunds stay hidden until MCP refunds are enabled too.';
             },
         );

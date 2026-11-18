@@ -35,6 +35,7 @@ class ScheduleTools
     )]
     #[McpToolMeta(category: ToolCategory::PLUGIN)]
     #[RequiresPermission('booked-accessPlugin')]
+    #[\CraftCms\Cms\Mcp\Attributes\RequiresPermission('booked-accessPlugin')]
     public function listSchedules(int $limit = 50): array
     {
         return $this->guard(function() use ($limit): array {
@@ -57,6 +58,7 @@ class ScheduleTools
     )]
     #[McpToolMeta(category: ToolCategory::PLUGIN)]
     #[RequiresPermission('booked-accessPlugin')]
+    #[\CraftCms\Cms\Mcp\Attributes\RequiresPermission('booked-accessPlugin')]
     public function getSchedule(int $id): array
     {
         return $this->guard(function() use ($id): array {
@@ -85,6 +87,7 @@ class ScheduleTools
     )]
     #[McpToolMeta(category: ToolCategory::PLUGIN, dangerous: true)]
     #[RequiresPermission('booked-accessPlugin')]
+    #[\CraftCms\Cms\Mcp\Attributes\RequiresPermission('booked-accessPlugin')]
     public function createSchedule(
         string $title,
         #[Schema(type: 'object')] ?array $workingHours = null,
@@ -119,6 +122,7 @@ class ScheduleTools
     )]
     #[McpToolMeta(category: ToolCategory::PLUGIN, dangerous: true)]
     #[RequiresPermission('booked-accessPlugin')]
+    #[\CraftCms\Cms\Mcp\Attributes\RequiresPermission('booked-accessPlugin')]
     public function updateSchedule(
         int $id,
         ?string $title = null,
@@ -163,6 +167,7 @@ class ScheduleTools
     )]
     #[McpToolMeta(category: ToolCategory::PLUGIN)]
     #[RequiresPermission('booked-accessPlugin')]
+    #[\CraftCms\Cms\Mcp\Attributes\RequiresPermission('booked-accessPlugin')]
     public function getEmployeeSchedules(int $employeeId): array
     {
         return $this->guard(function() use ($employeeId): array {
@@ -190,6 +195,7 @@ class ScheduleTools
     )]
     #[McpToolMeta(category: ToolCategory::PLUGIN, dangerous: true)]
     #[RequiresPermission('booked-accessPlugin')]
+    #[\CraftCms\Cms\Mcp\Attributes\RequiresPermission('booked-accessPlugin')]
     public function setEmployeeSchedules(int $employeeId, array $scheduleIds): array
     {
         return $this->guardWrite(static fn(): array => [

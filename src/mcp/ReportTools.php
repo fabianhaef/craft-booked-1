@@ -33,6 +33,7 @@ class ReportTools
     )]
     #[McpToolMeta(category: ToolCategory::PLUGIN)]
     #[RequiresPermission('booked-accessPlugin')]
+    #[\CraftCms\Cms\Mcp\Attributes\RequiresPermission('booked-accessPlugin')]
     public function revenueReport(?string $startDate = null, ?string $endDate = null, bool $includePreviousPeriod = false): array
     {
         return $this->guard(static function() use ($startDate, $endDate, $includePreviousPeriod): array {
@@ -64,6 +65,7 @@ class ReportTools
     )]
     #[McpToolMeta(category: ToolCategory::PLUGIN)]
     #[RequiresPermission('booked-accessPlugin')]
+    #[\CraftCms\Cms\Mcp\Attributes\RequiresPermission('booked-accessPlugin')]
     public function bookingsByService(?string $startDate = null, ?string $endDate = null): array
     {
         return $this->guard(static fn(): array => [
@@ -81,6 +83,7 @@ class ReportTools
     )]
     #[McpToolMeta(category: ToolCategory::PLUGIN)]
     #[RequiresPermission('booked-accessPlugin')]
+    #[\CraftCms\Cms\Mcp\Attributes\RequiresPermission('booked-accessPlugin')]
     public function bookingsByEmployee(?string $startDate = null, ?string $endDate = null): array
     {
         return $this->guard(static fn(): array => [
@@ -98,6 +101,7 @@ class ReportTools
     )]
     #[McpToolMeta(category: ToolCategory::PLUGIN)]
     #[RequiresPermission('booked-accessPlugin')]
+    #[\CraftCms\Cms\Mcp\Attributes\RequiresPermission('booked-accessPlugin')]
     public function bookingsByLocation(?string $startDate = null, ?string $endDate = null): array
     {
         return $this->guard(static fn(): array => [
@@ -115,6 +119,7 @@ class ReportTools
     )]
     #[McpToolMeta(category: ToolCategory::PLUGIN)]
     #[RequiresPermission('booked-accessPlugin')]
+    #[\CraftCms\Cms\Mcp\Attributes\RequiresPermission('booked-accessPlugin')]
     public function cancellationReport(?string $startDate = null, ?string $endDate = null): array
     {
         return $this->guard(static fn(): array => [
@@ -135,6 +140,7 @@ class ReportTools
     )]
     #[McpToolMeta(category: ToolCategory::PLUGIN)]
     #[RequiresPermission('booked-accessPlugin')]
+    #[\CraftCms\Cms\Mcp\Attributes\RequiresPermission('booked-accessPlugin')]
     public function peakHoursReport(
         ?string $startDate = null,
         ?string $endDate = null,
@@ -159,6 +165,7 @@ class ReportTools
     )]
     #[McpToolMeta(category: ToolCategory::PLUGIN)]
     #[RequiresPermission('booked-accessPlugin')]
+    #[\CraftCms\Cms\Mcp\Attributes\RequiresPermission('booked-accessPlugin')]
     public function utilizationReport(
         string $startDate,
         string $endDate,
@@ -181,6 +188,7 @@ class ReportTools
     )]
     #[McpToolMeta(category: ToolCategory::PLUGIN)]
     #[RequiresPermission('booked-accessPlugin')]
+    #[\CraftCms\Cms\Mcp\Attributes\RequiresPermission('booked-accessPlugin')]
     public function dashboardSummary(): array
     {
         return $this->guard(static fn(): array => [

@@ -30,6 +30,7 @@ class WaitlistTools
     )]
     #[McpToolMeta(category: ToolCategory::PLUGIN)]
     #[RequiresPermission('booked-accessPlugin')]
+    #[\CraftCms\Cms\Mcp\Attributes\RequiresPermission('booked-accessPlugin')]
     public function listWaitlist(int $serviceId, int $limit = 50, int $offset = 0): array
     {
         return $this->guard(function() use ($serviceId, $limit, $offset): array {
@@ -57,6 +58,7 @@ class WaitlistTools
     )]
     #[McpToolMeta(category: ToolCategory::PLUGIN)]
     #[RequiresPermission('booked-accessPlugin')]
+    #[\CraftCms\Cms\Mcp\Attributes\RequiresPermission('booked-accessPlugin')]
     public function waitlistStats(): array
     {
         return $this->guard(static fn(): array => [
@@ -86,6 +88,7 @@ class WaitlistTools
     )]
     #[McpToolMeta(category: ToolCategory::PLUGIN, dangerous: true)]
     #[RequiresPermission('booked-accessPlugin')]
+    #[\CraftCms\Cms\Mcp\Attributes\RequiresPermission('booked-accessPlugin')]
     public function addToWaitlist(
         int $serviceId,
         string $userName,
@@ -143,6 +146,7 @@ class WaitlistTools
     )]
     #[McpToolMeta(category: ToolCategory::PLUGIN, dangerous: true)]
     #[RequiresPermission('booked-accessPlugin')]
+    #[\CraftCms\Cms\Mcp\Attributes\RequiresPermission('booked-accessPlugin')]
     public function addToEventWaitlist(
         int $eventDateId,
         string $userName,
@@ -184,6 +188,7 @@ class WaitlistTools
     )]
     #[McpToolMeta(category: ToolCategory::PLUGIN, dangerous: true)]
     #[RequiresPermission('booked-accessPlugin')]
+    #[\CraftCms\Cms\Mcp\Attributes\RequiresPermission('booked-accessPlugin')]
     public function cancelWaitlistEntry(int $entryId): array
     {
         return $this->guardWrite(static fn(): array => [
@@ -205,6 +210,7 @@ class WaitlistTools
     )]
     #[McpToolMeta(category: ToolCategory::PLUGIN, dangerous: true)]
     #[RequiresPermission('booked-accessPlugin')]
+    #[\CraftCms\Cms\Mcp\Attributes\RequiresPermission('booked-accessPlugin')]
     public function notifyWaitlistEntry(int $entryId): array
     {
         return $this->guardWrite(function() use ($entryId): array {

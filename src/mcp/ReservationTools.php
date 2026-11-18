@@ -46,6 +46,7 @@ class ReservationTools
     )]
     #[McpToolMeta(category: ToolCategory::PLUGIN)]
     #[RequiresPermission('booked-accessPlugin')]
+    #[\CraftCms\Cms\Mcp\Attributes\RequiresPermission('booked-accessPlugin')]
     public function listReservations(
         ?string $status = null,
         ?int $serviceId = null,
@@ -107,6 +108,7 @@ class ReservationTools
     )]
     #[McpToolMeta(category: ToolCategory::PLUGIN)]
     #[RequiresPermission('booked-accessPlugin')]
+    #[\CraftCms\Cms\Mcp\Attributes\RequiresPermission('booked-accessPlugin')]
     public function getReservation(int $id): array
     {
         return $this->guard(function() use ($id): array {
@@ -131,6 +133,7 @@ class ReservationTools
     )]
     #[McpToolMeta(category: ToolCategory::PLUGIN)]
     #[RequiresPermission('booked-accessPlugin')]
+    #[\CraftCms\Cms\Mcp\Attributes\RequiresPermission('booked-accessPlugin')]
     public function bookingStats(): array
     {
         return $this->guard(static fn(): array => [
@@ -162,6 +165,7 @@ class ReservationTools
     )]
     #[McpToolMeta(category: ToolCategory::PLUGIN, dangerous: true)]
     #[RequiresPermission('booked-accessPlugin')]
+    #[\CraftCms\Cms\Mcp\Attributes\RequiresPermission('booked-accessPlugin')]
     public function createBooking(
         int $serviceId,
         string $bookingDate,
@@ -238,6 +242,7 @@ class ReservationTools
     )]
     #[McpToolMeta(category: ToolCategory::PLUGIN, dangerous: true)]
     #[RequiresPermission('booked-accessPlugin')]
+    #[\CraftCms\Cms\Mcp\Attributes\RequiresPermission('booked-accessPlugin')]
     public function createEventBooking(
         int $eventDateId,
         string $userName,
@@ -284,6 +289,7 @@ class ReservationTools
     )]
     #[McpToolMeta(category: ToolCategory::PLUGIN, dangerous: true)]
     #[RequiresPermission('booked-accessPlugin')]
+    #[\CraftCms\Cms\Mcp\Attributes\RequiresPermission('booked-accessPlugin')]
     public function cancelReservation(int $id, string $reason = ''): array
     {
         return $this->guardWrite(function() use ($id, $reason): array {
@@ -333,6 +339,7 @@ class ReservationTools
     )]
     #[McpToolMeta(category: ToolCategory::PLUGIN, dangerous: true)]
     #[RequiresPermission('booked-accessPlugin')]
+    #[\CraftCms\Cms\Mcp\Attributes\RequiresPermission('booked-accessPlugin')]
     public function updateReservation(
         int $id,
         ?string $bookingDate = null,
@@ -404,6 +411,7 @@ class ReservationTools
     )]
     #[McpToolMeta(category: ToolCategory::PLUGIN, dangerous: true)]
     #[RequiresPermission('booked-accessPlugin')]
+    #[\CraftCms\Cms\Mcp\Attributes\RequiresPermission('booked-accessPlugin')]
     public function reduceReservationQuantity(int $id, int $reduceBy, string $reason = ''): array
     {
         return $this->guardWrite(function() use ($id, $reduceBy, $reason): array {
@@ -433,6 +441,7 @@ class ReservationTools
     )]
     #[McpToolMeta(category: ToolCategory::PLUGIN, dangerous: true)]
     #[RequiresPermission('booked-accessPlugin')]
+    #[\CraftCms\Cms\Mcp\Attributes\RequiresPermission('booked-accessPlugin')]
     public function increaseReservationQuantity(int $id, int $increaseBy): array
     {
         return $this->guardWrite(function() use ($id, $increaseBy): array {
@@ -464,6 +473,7 @@ class ReservationTools
     )]
     #[McpToolMeta(category: ToolCategory::PLUGIN, dangerous: true)]
     #[RequiresPermission('booked-accessPlugin')]
+    #[\CraftCms\Cms\Mcp\Attributes\RequiresPermission('booked-accessPlugin')]
     public function refundReservation(int $id): array
     {
         return $this->guardWrite(function() use ($id): array {

@@ -56,6 +56,7 @@ class CatalogTools
     )]
     #[McpToolMeta(category: ToolCategory::PLUGIN)]
     #[RequiresPermission('booked-accessPlugin')]
+    #[\CraftCms\Cms\Mcp\Attributes\RequiresPermission('booked-accessPlugin')]
     public function listServices(int $limit = 50, int $offset = 0): array
     {
         return $this->guard(function() use ($limit, $offset): array {
@@ -84,6 +85,7 @@ class CatalogTools
     )]
     #[McpToolMeta(category: ToolCategory::PLUGIN)]
     #[RequiresPermission('booked-accessPlugin')]
+    #[\CraftCms\Cms\Mcp\Attributes\RequiresPermission('booked-accessPlugin')]
     public function getService(int $id): array
     {
         return $this->guard(function() use ($id): array {
@@ -114,6 +116,7 @@ class CatalogTools
     )]
     #[McpToolMeta(category: ToolCategory::PLUGIN, dangerous: true)]
     #[RequiresPermission('booked-accessPlugin')]
+    #[\CraftCms\Cms\Mcp\Attributes\RequiresPermission('booked-accessPlugin')]
     public function createService(
         string $title,
         int $duration = 60,
@@ -155,6 +158,7 @@ class CatalogTools
     )]
     #[McpToolMeta(category: ToolCategory::PLUGIN)]
     #[RequiresPermission('booked-accessPlugin')]
+    #[\CraftCms\Cms\Mcp\Attributes\RequiresPermission('booked-accessPlugin')]
     public function listEmployees(?int $serviceId = null, ?int $locationId = null, int $limit = 50): array
     {
         return $this->guard(function() use ($serviceId, $locationId, $limit): array {
@@ -184,6 +188,7 @@ class CatalogTools
     )]
     #[McpToolMeta(category: ToolCategory::PLUGIN)]
     #[RequiresPermission('booked-accessPlugin')]
+    #[\CraftCms\Cms\Mcp\Attributes\RequiresPermission('booked-accessPlugin')]
     public function listLocations(int $limit = 50): array
     {
         return $this->guard(function() use ($limit): array {
@@ -211,6 +216,7 @@ class CatalogTools
     )]
     #[McpToolMeta(category: ToolCategory::PLUGIN, dangerous: true)]
     #[RequiresPermission('booked-accessPlugin')]
+    #[\CraftCms\Cms\Mcp\Attributes\RequiresPermission('booked-accessPlugin')]
     public function updateService(
         int $id,
         ?string $title = null,
@@ -263,6 +269,7 @@ class CatalogTools
     )]
     #[McpToolMeta(category: ToolCategory::PLUGIN)]
     #[RequiresPermission('booked-accessPlugin')]
+    #[\CraftCms\Cms\Mcp\Attributes\RequiresPermission('booked-accessPlugin')]
     public function getLocation(int $id): array
     {
         return $this->guard(function() use ($id): array {
@@ -294,6 +301,7 @@ class CatalogTools
     )]
     #[McpToolMeta(category: ToolCategory::PLUGIN, dangerous: true)]
     #[RequiresPermission('booked-accessPlugin')]
+    #[\CraftCms\Cms\Mcp\Attributes\RequiresPermission('booked-accessPlugin')]
     public function createLocation(
         string $title,
         ?string $timezone = null,
@@ -335,6 +343,7 @@ class CatalogTools
     )]
     #[McpToolMeta(category: ToolCategory::PLUGIN, dangerous: true)]
     #[RequiresPermission('booked-accessPlugin')]
+    #[\CraftCms\Cms\Mcp\Attributes\RequiresPermission('booked-accessPlugin')]
     public function updateLocation(
         int $id,
         ?string $title = null,
@@ -385,6 +394,7 @@ class CatalogTools
     )]
     #[McpToolMeta(category: ToolCategory::PLUGIN)]
     #[RequiresPermission('booked-accessPlugin')]
+    #[\CraftCms\Cms\Mcp\Attributes\RequiresPermission('booked-accessPlugin')]
     public function getEmployee(int $id): array
     {
         return $this->guard(function() use ($id): array {
@@ -417,6 +427,7 @@ class CatalogTools
     )]
     #[McpToolMeta(category: ToolCategory::PLUGIN, dangerous: true)]
     #[RequiresPermission('booked-accessPlugin')]
+    #[\CraftCms\Cms\Mcp\Attributes\RequiresPermission('booked-accessPlugin')]
     public function createEmployee(
         string $title,
         ?string $email = null,
@@ -463,6 +474,7 @@ class CatalogTools
     )]
     #[McpToolMeta(category: ToolCategory::PLUGIN, dangerous: true)]
     #[RequiresPermission('booked-accessPlugin')]
+    #[\CraftCms\Cms\Mcp\Attributes\RequiresPermission('booked-accessPlugin')]
     public function updateEmployee(
         int $id,
         ?string $title = null,

@@ -34,6 +34,7 @@ class ServiceExtraTools
     )]
     #[McpToolMeta(category: ToolCategory::PLUGIN)]
     #[RequiresPermission('booked-accessPlugin')]
+    #[\CraftCms\Cms\Mcp\Attributes\RequiresPermission('booked-accessPlugin')]
     public function listServiceExtras(int $limit = 50, int $offset = 0): array
     {
         return $this->guard(function() use ($limit, $offset): array {
@@ -68,6 +69,7 @@ class ServiceExtraTools
     )]
     #[McpToolMeta(category: ToolCategory::PLUGIN, dangerous: true)]
     #[RequiresPermission('booked-accessPlugin')]
+    #[\CraftCms\Cms\Mcp\Attributes\RequiresPermission('booked-accessPlugin')]
     public function createServiceExtra(
         string $title,
         float $price = 0.0,
@@ -103,6 +105,7 @@ class ServiceExtraTools
     )]
     #[McpToolMeta(category: ToolCategory::PLUGIN)]
     #[RequiresPermission('booked-accessPlugin')]
+    #[\CraftCms\Cms\Mcp\Attributes\RequiresPermission('booked-accessPlugin')]
     public function getServiceExtras(int $serviceId, bool $enabledOnly = false): array
     {
         return $this->guard(function() use ($serviceId, $enabledOnly): array {
@@ -130,6 +133,7 @@ class ServiceExtraTools
     )]
     #[McpToolMeta(category: ToolCategory::PLUGIN, dangerous: true)]
     #[RequiresPermission('booked-accessPlugin')]
+    #[\CraftCms\Cms\Mcp\Attributes\RequiresPermission('booked-accessPlugin')]
     public function setServiceExtras(int $serviceId, array $extraIds): array
     {
         return $this->guardWrite(static fn(): array => [
@@ -149,6 +153,7 @@ class ServiceExtraTools
     )]
     #[McpToolMeta(category: ToolCategory::PLUGIN)]
     #[RequiresPermission('booked-accessPlugin')]
+    #[\CraftCms\Cms\Mcp\Attributes\RequiresPermission('booked-accessPlugin')]
     public function getServiceLocations(int $serviceId): array
     {
         return $this->guard(function() use ($serviceId): array {
@@ -176,6 +181,7 @@ class ServiceExtraTools
     )]
     #[McpToolMeta(category: ToolCategory::PLUGIN, dangerous: true)]
     #[RequiresPermission('booked-accessPlugin')]
+    #[\CraftCms\Cms\Mcp\Attributes\RequiresPermission('booked-accessPlugin')]
     public function setServiceLocations(int $serviceId, array $locationIds): array
     {
         return $this->guardWrite(static fn(): array => [

@@ -33,6 +33,7 @@ class BlackoutDateTools
     )]
     #[McpToolMeta(category: ToolCategory::PLUGIN)]
     #[RequiresPermission('booked-accessPlugin')]
+    #[\CraftCms\Cms\Mcp\Attributes\RequiresPermission('booked-accessPlugin')]
     public function listBlackoutDates(int $limit = 100): array
     {
         return $this->guard(function() use ($limit): array {
@@ -62,6 +63,7 @@ class BlackoutDateTools
     )]
     #[McpToolMeta(category: ToolCategory::PLUGIN, dangerous: true)]
     #[RequiresPermission('booked-accessPlugin')]
+    #[\CraftCms\Cms\Mcp\Attributes\RequiresPermission('booked-accessPlugin')]
     public function createBlackoutDate(
         string $title,
         string $startDate,
@@ -101,6 +103,7 @@ class BlackoutDateTools
     )]
     #[McpToolMeta(category: ToolCategory::PLUGIN, dangerous: true)]
     #[RequiresPermission('booked-accessPlugin')]
+    #[\CraftCms\Cms\Mcp\Attributes\RequiresPermission('booked-accessPlugin')]
     public function setBlackoutDateActive(int $id, bool $isActive): array
     {
         return $this->guardWrite(function() use ($id, $isActive): array {
@@ -134,6 +137,7 @@ class BlackoutDateTools
     )]
     #[McpToolMeta(category: ToolCategory::PLUGIN)]
     #[RequiresPermission('booked-accessPlugin')]
+    #[\CraftCms\Cms\Mcp\Attributes\RequiresPermission('booked-accessPlugin')]
     public function checkDateBlackedOut(string $date, ?int $employeeId = null, ?int $locationId = null): array
     {
         return $this->guard(static fn(): array => [

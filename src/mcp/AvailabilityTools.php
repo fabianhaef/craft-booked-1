@@ -38,6 +38,7 @@ class AvailabilityTools
     )]
     #[McpToolMeta(category: ToolCategory::PLUGIN)]
     #[RequiresPermission('booked-accessPlugin')]
+    #[\CraftCms\Cms\Mcp\Attributes\RequiresPermission('booked-accessPlugin')]
     public function checkAvailability(
         string $date,
         ?int $serviceId = null,
@@ -72,6 +73,7 @@ class AvailabilityTools
     )]
     #[McpToolMeta(category: ToolCategory::PLUGIN)]
     #[RequiresPermission('booked-accessPlugin')]
+    #[\CraftCms\Cms\Mcp\Attributes\RequiresPermission('booked-accessPlugin')]
     public function nextAvailableDate(
         ?int $serviceId = null,
         ?int $employeeId = null,
@@ -105,6 +107,7 @@ class AvailabilityTools
     )]
     #[McpToolMeta(category: ToolCategory::PLUGIN)]
     #[RequiresPermission('booked-accessPlugin')]
+    #[\CraftCms\Cms\Mcp\Attributes\RequiresPermission('booked-accessPlugin')]
     public function availabilitySummary(
         string $startDate,
         string $endDate,
