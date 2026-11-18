@@ -33,6 +33,19 @@ use ReflectionClass;
  * LegacyYiiRule, which implements Laravel's legacy ImplicitRule contract,
  * so it still runs on empty values.
  *
+ * A third, independent problem: the closure mergeWildcardRules() builds
+ * calls Yii's Validator::validateAttribute() (singular) directly for every
+ * matching rule, unconditionally. That method never checks a rule's 'when'
+ * option at all - only Validator::validateAttributes() (plural), the batch
+ * method Yii's own Model::validate() normally calls, does that (confirmed
+ * against vendor/yiisoft/yii2/validators/Validator.php: the check is inside
+ * validateAttributes(), not validateAttribute()). Without a fix, every
+ * 'when'-conditioned rule in a Booked element - e.g. Service's minDays/
+ * maxDays, required only when durationType is 'flexible_days' - runs
+ * unconditionally (MIGRATION_PLAN.md finding #14). rules() filters those
+ * rules out itself, before they ever reach mergeWildcardRules(), by
+ * evaluating each rule's own 'when' callback against the current subject.
+ *
  * @author Anvildev
  * @since 2.0.0
  */
@@ -53,6 +66,7 @@ class LegacyElementRules extends ElementRules
 
         $method = $reflectionClass->getMethod('defineRules');
         $yiiRules = $method->invoke($this->subject);
+        $yiiRules = self::applyWhenConditions($yiiRules, $this->subject);
 
         $rules = LegacyYiiRules::mergeWildcardRules(
             rules: $rules,
@@ -69,5 +83,30 @@ class LegacyElementRules extends ElementRules
         });
 
         return $rules;
+    }
+
+    /**
+     * Drops any Yii rule whose 'when' callback evaluates false for the
+     * current subject, before the rule ever reaches
+     * LegacyYiiRules::validatorClosure() (see the class docblock for why
+     * that closure can't honor 'when' itself).
+     *
+     * Evaluated once per rule here, using the subject's current state -
+     * not once per (rule, attribute) pair the way Yii's own check runs -
+     * since every 'when' closure Booked actually writes only inspects the
+     * model, never the specific attribute being validated.
+     *
+     * @param array<int, mixed> $yiiRules
+     * @return array<int, mixed>
+     */
+    private static function applyWhenConditions(array $yiiRules, object $subject): array
+    {
+        return array_values(array_filter($yiiRules, function($rule) use ($subject) {
+            if (!is_array($rule) || !isset($rule['when']) || !is_callable($rule['when'])) {
+                return true;
+            }
+
+            return (bool)($rule['when'])($subject);
+        }));
     }
 }
