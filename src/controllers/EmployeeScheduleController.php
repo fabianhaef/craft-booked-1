@@ -303,11 +303,19 @@ class EmployeeScheduleController extends Controller
 
     private function getAllEmployeesWithUsers(): array
     {
-        return Employee::find()
-            ->siteId('*')
-            ->where(['not', ['userId' => null]])
-            ->status('enabled')
-            ->orderBy('title')
-            ->all();
+        $query = Employee::find()->siteId('*');
+
+        // Craft 6: where() is a real native Laravel method now, not a Yii-compat
+        // mixin - it misreads ['not', [...]] as an array-of-wheres (treating 0/1
+        // as column names, producing `0` = 'not' SQL), the same bug family as
+        // findings #10/#12/#16. method_exists(getQuery()) is how this migration
+        // tells a Craft 6 ElementQuery apart from a real Yii ActiveQuery.
+        if (method_exists($query, 'getQuery')) {
+            $query->getQuery()->whereNotNull('booked_employees.userId');
+        } else {
+            $query->where(['not', ['userId' => null]]);
+        }
+
+        return $query->status('enabled')->orderBy('title')->all();
     }
 }
