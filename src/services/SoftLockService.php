@@ -3,6 +3,7 @@
 namespace anvildev\booked\services;
 
 use anvildev\booked\Booked;
+use anvildev\booked\helpers\SecurityCrypto;
 use anvildev\booked\records\SoftLockRecord;
 use Craft;
 use craft\base\Component;
@@ -245,7 +246,7 @@ class SoftLockService extends Component
             ? (Craft::$app->getSession()->getId() ?: '')
             : 'console_' . getmypid();
         try {
-            $salt = Craft::$app->getConfig()->getGeneral()->securityKey ?? '';
+            $salt = SecurityCrypto::key();
         } catch (\Throwable) {
             $salt = '';
         }

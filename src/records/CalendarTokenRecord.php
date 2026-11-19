@@ -2,6 +2,7 @@
 
 namespace anvildev\booked\records;
 
+use anvildev\booked\helpers\SecurityCrypto;
 use craft\db\ActiveRecord;
 
 /**
@@ -22,10 +23,10 @@ class CalendarTokenRecord extends ActiveRecord
     public function beforeSave($insert): bool
     {
         if ($this->accessToken) {
-            $this->accessToken = base64_encode(\Craft::$app->getSecurity()->encryptByKey($this->accessToken));
+            $this->accessToken = SecurityCrypto::encrypt($this->accessToken);
         }
         if ($this->refreshToken) {
-            $this->refreshToken = base64_encode(\Craft::$app->getSecurity()->encryptByKey($this->refreshToken));
+            $this->refreshToken = SecurityCrypto::encrypt($this->refreshToken);
         }
         return parent::beforeSave($insert);
     }
@@ -35,20 +36,14 @@ class CalendarTokenRecord extends ActiveRecord
         parent::afterFind();
         if ($this->accessToken) {
             try {
-                $decoded = base64_decode($this->accessToken, true);
-                $this->accessToken = $decoded !== false
-                    ? \Craft::$app->getSecurity()->decryptByKey($decoded)
-                    : \Craft::$app->getSecurity()->decryptByKey($this->accessToken);
+                $this->accessToken = SecurityCrypto::decrypt($this->accessToken);
             } catch (\Throwable) {
                 // Token may not be encrypted yet (pre-migration data)
             }
         }
         if ($this->refreshToken) {
             try {
-                $decoded = base64_decode($this->refreshToken, true);
-                $this->refreshToken = $decoded !== false
-                    ? \Craft::$app->getSecurity()->decryptByKey($decoded)
-                    : \Craft::$app->getSecurity()->decryptByKey($this->refreshToken);
+                $this->refreshToken = SecurityCrypto::decrypt($this->refreshToken);
             } catch (\Throwable) {
                 // Token may not be encrypted yet (pre-migration data)
             }

@@ -7,13 +7,13 @@ use anvildev\booked\contracts\PaymentGatewayInterface;
 use anvildev\booked\contracts\ReservationInterface;
 use anvildev\booked\events\PaymentRefundedEvent;
 use anvildev\booked\helpers\PaymentTokenHelper;
+use anvildev\booked\helpers\SecurityCrypto;
 use anvildev\booked\models\Settings;
 use anvildev\booked\payments\PaymentContext;
 use anvildev\booked\payments\RefundResult;
 use anvildev\booked\records\PaymentRecord;
 use Craft;
 use craft\base\Component;
-use craft\helpers\App;
 use RuntimeException;
 
 /**
@@ -337,6 +337,6 @@ class PaymentService extends Component
 
     private static function securityKey(): string
     {
-        return (string) App::parseEnv(Craft::$app->getConfig()->getGeneral()->securityKey);
+        return SecurityCrypto::key();
     }
 }

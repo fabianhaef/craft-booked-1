@@ -8,10 +8,10 @@ use anvildev\booked\controllers\traits\HandlesExceptionsTrait;
 use anvildev\booked\controllers\traits\JsonResponseTrait;
 use anvildev\booked\factories\ReservationFactory;
 use anvildev\booked\helpers\PaymentTokenHelper;
+use anvildev\booked\helpers\SecurityCrypto;
 use anvildev\booked\records\PaymentRecord;
 use anvildev\booked\services\PaymentService;
 use Craft;
-use craft\helpers\App;
 use craft\web\Controller;
 use craft\web\Response;
 
@@ -158,8 +158,7 @@ class PaymentController extends Controller
         $this->requireAcceptsJson();
 
         $token = (string) Craft::$app->request->getRequiredBodyParam('paymentToken');
-        $key = (string) App::parseEnv(Craft::$app->getConfig()->getGeneral()->securityKey);
-        $parts = PaymentTokenHelper::verify($token, $key);
+        $parts = PaymentTokenHelper::verify($token, SecurityCrypto::key());
         if ($parts === null) {
             return $this->jsonError(Craft::t('booked', 'booking.unauthorized'), statusCode: 403);
         }

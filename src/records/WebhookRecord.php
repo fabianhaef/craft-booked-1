@@ -2,7 +2,7 @@
 
 namespace anvildev\booked\records;
 
-use Craft;
+use anvildev\booked\helpers\SecurityCrypto;
 use craft\db\ActiveRecord;
 
 /**
@@ -32,9 +32,7 @@ class WebhookRecord extends ActiveRecord
     public function beforeSave($insert): bool
     {
         if ($this->secret && !$this->_encrypted) {
-            $this->secret = base64_encode(
-                Craft::$app->getSecurity()->encryptByKey($this->secret)
-            );
+            $this->secret = SecurityCrypto::encrypt($this->secret);
             $this->_encrypted = true;
         }
         return parent::beforeSave($insert);
@@ -51,10 +49,7 @@ class WebhookRecord extends ActiveRecord
         parent::afterFind();
         if ($this->secret) {
             try {
-                $decoded = base64_decode($this->secret, true);
-                $this->secret = $decoded !== false
-                    ? Craft::$app->getSecurity()->decryptByKey($decoded)
-                    : Craft::$app->getSecurity()->decryptByKey($this->secret);
+                $this->secret = SecurityCrypto::decrypt($this->secret);
             } catch (\Throwable) {
                 // Secret may not be encrypted yet (pre-migration data)
             }

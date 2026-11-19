@@ -2,6 +2,7 @@
 
 namespace anvildev\booked\records;
 
+use anvildev\booked\helpers\SecurityCrypto;
 use Craft;
 use craft\db\ActiveRecord;
 
@@ -122,7 +123,7 @@ class SettingsRecord extends ActiveRecord
         if (!$this->_encrypted) {
             foreach (self::ENCRYPTED_FIELDS as $field) {
                 if ($this->$field) {
-                    $this->$field = base64_encode(Craft::$app->getSecurity()->encryptByKey($this->$field));
+                    $this->$field = SecurityCrypto::encrypt($this->$field);
                 }
             }
             $this->_encrypted = true;
@@ -145,10 +146,7 @@ class SettingsRecord extends ActiveRecord
         foreach (self::ENCRYPTED_FIELDS as $field) {
             if ($this->$field) {
                 try {
-                    $decoded = base64_decode($this->$field, true);
-                    $this->$field = $decoded !== false
-                        ? Craft::$app->getSecurity()->decryptByKey($decoded)
-                        : Craft::$app->getSecurity()->decryptByKey($this->$field);
+                    $this->$field = SecurityCrypto::decrypt($this->$field);
                 } catch (\Throwable $e) {
                     Craft::warning("Failed to decrypt settings field '{$field}': {$e->getMessage()}. Value cleared to prevent double-encryption. Re-enter the value in settings.", __METHOD__);
                     $this->$field = null;

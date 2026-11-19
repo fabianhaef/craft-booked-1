@@ -420,8 +420,10 @@ TEXT;
     {
         $record = CalendarTokenRecord::findOne(['employeeId' => $employeeId, 'provider' => $provider]);
         return $record ? [
-            'accessToken' => Craft::$app->getSecurity()->decryptByKey($record->accessToken, 'booked_calendar_tokens'),
-            'refreshToken' => $record->refreshToken ? Craft::$app->getSecurity()->decryptByKey($record->refreshToken, 'booked_calendar_tokens') : null,
+            // CalendarTokenRecord::afterFind() already decrypts both fields - see
+            // MIGRATION_PLAN.md finding #19.
+            'accessToken' => $record->accessToken,
+            'refreshToken' => $record->refreshToken,
             'expiresAt' => $record->expiresAt,
         ] : null;
     }
@@ -448,10 +450,10 @@ TEXT;
 
         $record->employeeId = $employeeId;
         $record->provider = $provider;
-        $record->accessToken = Craft::$app->getSecurity()->encryptByKey($data['accessToken'], 'booked_calendar_tokens');
-        $record->refreshToken = $data['refreshToken']
-            ? Craft::$app->getSecurity()->encryptByKey($data['refreshToken'], 'booked_calendar_tokens')
-            : $record->refreshToken;
+        // CalendarTokenRecord::beforeSave() already encrypts both fields - see
+        // MIGRATION_PLAN.md finding #19.
+        $record->accessToken = $data['accessToken'];
+        $record->refreshToken = $data['refreshToken'] ?: $record->refreshToken;
         $record->expiresAt = $data['expiresAt'];
 
         if ($record->getIsNewRecord() && empty($data['refreshToken'])) {
