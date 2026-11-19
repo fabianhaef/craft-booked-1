@@ -258,7 +258,6 @@ class BookingManagementController extends Controller
             if (Craft::$app->request->getAcceptsJson()) {
                 return $this->jsonSuccess(Craft::t('booked', 'booking.cancelSuccess'));
             }
-            Craft::$app->session->setNotice(Craft::t('booked', 'booking.cancelSuccess'));
             return $this->renderTemplate('booked/cancelled', ['reservation' => $reservation]);
         }
 
