@@ -162,20 +162,6 @@ class BookingVariable
         return Booked::getInstance()->getSettings();
     }
 
-    /**
-     * Log a deprecation warning for the legacy Alpine wizard. Called by the
-     * wizard dispatcher template when `legacyWizard` is active.
-     */
-    public function markLegacyWizardDeprecated(): string
-    {
-        Craft::$app->getDeprecator()->log(
-            'booked-legacy-wizard',
-            'The Alpine.js Booked wizard is deprecated as of Booked 1.3 and will be removed in 2.0. Unset the "legacyWizard" setting to use the framework-free vanilla wizard.',
-        );
-
-        return '';
-    }
-
     public function isSlotAvailable(
         string $date,
         string $startTime,

@@ -1,18 +1,1 @@
-{# ==========================================================================
-   Booked — booking wizard dispatcher.
-
-   Renders the framework-free vanilla wizard by default. Set the `legacyWizard`
-   plugin setting (or pass `legacyWizard: true` to this include) to fall back to
-   the deprecated Alpine.js wizard for one deprecation window (removed in 2.0).
-
-   The include path and all documented config variables are unchanged, so
-   existing `{% include 'booked/frontend/wizard' %}` usage keeps working.
-   ========================================================================== #}
-{% set useLegacyWizard = legacyWizard ?? craft.booked.getSettings().legacyWizard %}
-
-{% if useLegacyWizard %}
-    {% do craft.booked.markLegacyWizardDeprecated() %}
-    {% include 'booked/frontend/wizard-alpine' %}
-{% else %}
-    {% include 'booked/frontend/wizard-vanilla' %}
-{% endif %}
+{% include 'booked/frontend/wizard-vanilla' %}

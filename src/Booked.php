@@ -835,10 +835,10 @@ class Booked extends Plugin
      *
      * These are thin aliases onto the existing frontend controller actions: the
      * headless wizard core targets only the versioned paths, while the original
-     * action routes keep working through the Alpine deprecation window. Route
-     * tokens (e.g. serviceId) merge into request params, so the backing actions
-     * read them unchanged. Management-mode routes are added when that flow is
-     * wired into the core.
+     * action routes keep working for any other caller. Route tokens (e.g.
+     * serviceId) merge into request params, so the backing actions read them
+     * unchanged. Management-mode routes are added when that flow is wired into
+     * the core.
      */
     private function registerApiRoutes(): void
     {

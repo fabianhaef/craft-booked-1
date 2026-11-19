@@ -6,7 +6,7 @@ use craft\web\AssetBundle;
 
 class BookedEmployeeScheduleAsset extends AssetBundle
 {
-    public $depends = [BookedAsset::class];
+    public $depends = [BookedCpAsset::class];
 
     public function init(): void
     {

@@ -5,9 +5,9 @@ machine + API client, zero runtime dependencies) plus a vanilla renderer. This
 guide covers the three ways to use it — drop-in Twig, template customization,
 and fully headless — plus the public JS API and the `data-booked-*` contract.
 
-> Status: 1.3.0. `{% include 'booked/frontend/wizard' %}` renders the vanilla
-> wizard by default; the deprecated legacy wizard is restored with the
-> `legacyWizard` setting (removed in 2.0).
+> `{% include 'booked/frontend/wizard' %}` always renders the vanilla wizard.
+> The Alpine.js wizard and its `legacyWizard` escape hatch have been removed
+> — there is no framework-based alternative anymore.
 
 ---
 
@@ -149,9 +149,8 @@ bookings, whose server-side seat lock is best-effort, submit directly from
 
 - The include path and documented config variables are unchanged — existing
   drop-in usage keeps working, now rendering the vanilla wizard.
-- Need the old wizard while you migrate a heavy customization? Enable the
-  **`legacyWizard`** setting (or `{% include 'booked/frontend/wizard' with
-  { legacyWizard: true } %}`). It's deprecated and removed in 2.0.
+- The Alpine.js wizard and its `legacyWizard` escape hatch are gone — there's
+  no setting to fall back to it anymore.
 - Forked the old legacy wizard? The structure maps to **Twig template overrides
   + JS events**: markup you edited in its directive attributes becomes `data-booked-*`
   markup; logic you patched becomes an event listener on the core. There is no

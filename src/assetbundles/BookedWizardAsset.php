@@ -9,10 +9,10 @@ use craft\web\View;
  * Front-end booking wizard assets — the zero-dependency vanilla bundle.
  *
  * Ships the framework-free `booked-wizard.umd.js` (headless core + renderer) and
- * the wizard stylesheet. Unlike {@see BookedAsset}, it loads no Alpine.js and no
- * legacy wizard scripts, so the page runs under a strict CSP (no `unsafe-eval`).
- * The bundle exposes the global `BookedWizard`, deferred so the DOM is parsed
- * before the init script in the template runs.
+ * the wizard stylesheet. No Alpine.js, no other runtime dependency, so the page
+ * runs under a strict CSP (no `unsafe-eval`). The bundle exposes the global
+ * `BookedWizard`, deferred so the DOM is parsed before the init script in the
+ * template runs.
  */
 class BookedWizardAsset extends AssetBundle
 {

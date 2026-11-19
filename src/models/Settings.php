@@ -57,12 +57,6 @@ class Settings extends Model
     public int $minimumSubmissionTime = 3;
     public bool $enableAuditLog = false;
 
-    // Frontend wizard
-    /**
-     * Restore the legacy Alpine.js booking wizard instead of the framework-free
-     * vanilla wizard. Deprecated as of 1.3 — this escape hatch is removed in Booked 2.0.
-     */
-    public bool $legacyWizard = false;
     /**
      * The volume (by UID) that files uploaded for an Assets-type reservation
      * question (#146) are stored in. Uploads for those questions are rejected

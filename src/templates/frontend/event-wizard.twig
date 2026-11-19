@@ -1,16 +1,1 @@
-{# ==========================================================================
-   Booked — event wizard dispatcher.
-
-   Renders the framework-free vanilla event wizard by default. Set the
-   `legacyWizard` plugin setting (or pass `legacyWizard: true`) to fall back to
-   the deprecated Alpine.js event wizard for one deprecation window (removed in
-   2.0). The include path and config variables are unchanged.
-   ========================================================================== #}
-{% set useLegacyWizard = legacyWizard ?? craft.booked.getSettings().legacyWizard %}
-
-{% if useLegacyWizard %}
-    {% do craft.booked.markLegacyWizardDeprecated() %}
-    {% include 'booked/frontend/event-wizard-alpine' %}
-{% else %}
-    {% include 'booked/frontend/event-wizard-vanilla' %}
-{% endif %}
+{% include 'booked/frontend/event-wizard-vanilla' %}
