@@ -28,9 +28,27 @@ class UsersController extends Controller
         }
 
         try {
-            $reservations = ReservationFactory::find()
-                ->where(['userId' => null])
-                ->andWhere(['not', ['userEmail' => null]])
+            $query = ReservationFactory::find()
+                ->where(['userId' => null]);
+
+            // Craft 6's legacy andWhere() shim (CraftCms\Yii2Adapter\Mixins\
+            // ElementQueryMixin) mis-renders any condition that compiles
+            // with zero bound params — a pure null check like this one —
+            // into garbled SQL (confirmed live via ->toSql()). whereNotNull()
+            // is the real Laravel builder method and bypasses that shim
+            // entirely. It's reached via ElementQuery's __call()-forwarding
+            // to the underlying Illuminate builder, not a declared method,
+            // so method_exists() on $query returns false even on Craft 6 —
+            // check for the native class instead. Doesn't exist on Craft
+            // 5's Yii-based ElementQuery, so this falls back to the
+            // original (unaffected there) call.
+            if (class_exists(\CraftCms\Cms\Element\Queries\ElementQuery::class)) {
+                $query->whereNotNull('userEmail');
+            } else {
+                $query->andWhere(['not', ['userEmail' => null]]);
+            }
+
+            $reservations = $query
                 ->andWhere(['not', ['userEmail' => '']])
                 ->all();
 
@@ -112,7 +130,19 @@ class UsersController extends Controller
         $this->stdout("Booking User Link Statistics:\n\n");
 
         try {
-            $linkedCount = ReservationFactory::find()->where(['not', ['userId' => null]])->count();
+            $linkedQuery = ReservationFactory::find();
+            // Same Craft 6 legacy-shim gap as actionLinkBookings() above,
+            // but hit through the native where() here instead of
+            // andWhere(): passing it a Yii operator array like
+            // ['not', ['userId' => null]] doesn't throw, it silently
+            // compiles to a nonsense `0 = ?` condition (confirmed live via
+            // ->toSql()), so this can't be left as a fallback-only branch.
+            if (class_exists(\CraftCms\Cms\Element\Queries\ElementQuery::class)) {
+                $linkedQuery->whereNotNull('userId');
+            } else {
+                $linkedQuery->where(['not', ['userId' => null]]);
+            }
+            $linkedCount = $linkedQuery->count();
             $unlinkedCount = ReservationFactory::find()->where(['userId' => null])->count();
 
             $unlinkedEmails = (new \yii\db\Query())
