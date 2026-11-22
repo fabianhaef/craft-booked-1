@@ -166,8 +166,9 @@
                                 {{ entry.getStatusLabel() }}
                             </td>
                             <td>
-                                {% if entry.preferredDate %}
-                                    {{ entry.preferredDate|date('M j, Y') }}
+                                {% set preferredDate = entry.getAttribute('preferredDate') %}
+                                {% if preferredDate %}
+                                    {{ preferredDate|date('M j, Y') }}
                                 {% else %}
                                     <span class="light">{{ 'waitlist.anyDate'|t('booked') }}</span>
                                 {% endif %}

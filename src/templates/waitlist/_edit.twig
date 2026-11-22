@@ -53,22 +53,24 @@
             readonly: true,
         }) }}
 
-		{% if entry.userPhone %}
+		{% set userPhone = entry.getAttribute('userPhone') %}
+		{% if userPhone %}
 			{{ forms.textField({
                 label: 'waitlist.edit.phone'|t('booked'),
-                value: entry.userPhone,
+                value: userPhone,
                 readonly: true,
             }) }}
 		{% endif %}
 
-		{% if entry.userId %}
+		{% set userId = entry.getAttribute('userId') %}
+		{% if userId %}
 			<div class="field">
 				<div class="heading">
 					<label>{{ 'waitlist.edit.userAccount'|t('booked') }}</label>
 				</div>
 				<div class="input">
 					{% if entry.userEmail %}
-						<a href="{{ cpUrl('users/' ~ entry.userId) }}">{{ entry.userEmail }}</a>
+						<a href="{{ cpUrl('users/' ~ userId) }}">{{ entry.userEmail }}</a>
 					{% endif %}
 				</div>
 			</div>
@@ -157,34 +159,38 @@
 					<label>{{ 'waitlist.edit.preferredDate'|t('booked') }}</label>
 				</div>
 				<div class="input">
-					{% if entry.preferredDate %}
-						{{ entry.preferredDate|date('l, F j, Y') }}
+					{% set preferredDate = entry.getAttribute('preferredDate') %}
+					{% if preferredDate %}
+						{{ preferredDate|date('l, F j, Y') }}
 					{% else %}
 						<span class="light">{{ 'waitlist.edit.anyDate'|t('booked') }}</span>
 					{% endif %}
 				</div>
 			</div>
 
-			{% if entry.preferredTimeStart or entry.preferredTimeEnd %}
+			{% set preferredTimeStart = entry.getAttribute('preferredTimeStart') %}
+			{% set preferredTimeEnd = entry.getAttribute('preferredTimeEnd') %}
+			{% if preferredTimeStart or preferredTimeEnd %}
 				<div class="field">
 					<div class="heading">
 						<label>{{ 'waitlist.edit.preferredTime'|t('booked') }}</label>
 					</div>
 					<div class="input">
-						{{ entry.preferredTimeStart ?? 'Any' }}
+						{{ preferredTimeStart ?? 'Any' }}
 						&ndash;
-						{{ entry.preferredTimeEnd ?? 'Any' }}
+						{{ preferredTimeEnd ?? 'Any' }}
 					</div>
 				</div>
 			{% endif %}
 		{% endif %}
 
-		{% if entry.notes %}
+		{% set notes = entry.getAttribute('notes') %}
+		{% if notes %}
 			<hr>
 			<h2>{{ 'waitlist.edit.notes'|t('booked') }}</h2>
 			<div class="field">
 				<div class="input">
-					{{ entry.notes|nl2br }}
+					{{ notes|nl2br }}
 				</div>
 			</div>
 		{% endif %}
@@ -226,16 +232,18 @@
 			<h5 class="heading">{{ 'waitlist.edit.created'|t('booked') }}</h5>
 			<div class="value">{{ entry.dateCreated|date('M j, Y g:i A') }}</div>
 		</div>
-		{% if entry.expiresAt %}
+		{% set expiresAt = entry.getAttribute('expiresAt') %}
+		{% if expiresAt %}
 			<div class="data">
 				<h5 class="heading">{{ 'waitlist.edit.expires'|t('booked') }}</h5>
-				<div class="value">{{ entry.expiresAt|date('M j, Y g:i A') }}</div>
+				<div class="value">{{ expiresAt|date('M j, Y g:i A') }}</div>
 			</div>
 		{% endif %}
-		{% if entry.notifiedAt %}
+		{% set notifiedAt = entry.getAttribute('notifiedAt') %}
+		{% if notifiedAt %}
 			<div class="data">
 				<h5 class="heading">{{ 'waitlist.edit.statusNotified'|t('booked') }}</h5>
-				<div class="value">{{ entry.notifiedAt|date('M j, Y g:i A') }}</div>
+				<div class="value">{{ notifiedAt|date('M j, Y g:i A') }}</div>
 			</div>
 		{% endif %}
 	</div>
