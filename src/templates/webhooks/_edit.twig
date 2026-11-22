@@ -96,7 +96,7 @@
 			<div class="input">
 				<div class="flex">
 					<div class="flex-grow">
-						<input type="text" class="text fullwidth code" value="{{ webhook.secret }}" readonly id="secret-display">
+						<input type="text" class="text fullwidth code" value="{{ webhook.getAttribute('secret') }}" readonly id="secret-display">
 					</div>
 					<button type="button" class="btn" onclick="copySecret()">{{ 'webhook.edit.copy'|t('booked') }}</button>
 					{% if not isNew %}

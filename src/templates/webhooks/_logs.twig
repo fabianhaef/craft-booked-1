@@ -70,10 +70,10 @@
 								{{ log.statusLabel }}
 							</td>
 							<td>
-								{% if log.responseCode %}
-									<span class="booked-log-http-code {{ log.success ? 'code-success' : 'code-error' }}">{{ log.responseCode }}</span>
-								{% elseif log.errorMessage %}
-									<span class="error">{{ log.errorMessage|slice(0, 50) }}{{ log.errorMessage|length > 50 ? '...' : '' }}</span>
+								{% if log.getAttribute('responseCode') %}
+									<span class="booked-log-http-code {{ log.success ? 'code-success' : 'code-error' }}">{{ log.getAttribute('responseCode') }}</span>
+								{% elseif log.getAttribute('errorMessage') %}
+									<span class="error">{{ log.getAttribute('errorMessage')|slice(0, 50) }}{{ log.getAttribute('errorMessage')|length > 50 ? '...' : '' }}</span>
 								{% else %}
 									<span class="light">&ndash;</span>
 								{% endif %}
@@ -107,13 +107,13 @@
 										</div>
 										<div>
 											<h4 class="booked-log-detail-heading">{{ 'webhook.logs.responseBody'|t('booked') }}</h4>
-											<pre class="booked-code-block">{{ log.responseBody|default('N/A') }}</pre>
+											<pre class="booked-code-block">{{ log.getAttribute('responseBody')|default('N/A') }}</pre>
 										</div>
 									</div>
-									{% if log.errorMessage %}
+									{% if log.getAttribute('errorMessage') %}
 										<div class="booked-mt-16">
 											<h4 class="booked-log-detail-heading">{{ 'webhook.logs.errorMessage'|t('booked') }}</h4>
-											<div class="booked-log-error-box">{{ log.errorMessage }}</div>
+											<div class="booked-log-error-box">{{ log.getAttribute('errorMessage') }}</div>
 										</div>
 									{% endif %}
 								</div>
