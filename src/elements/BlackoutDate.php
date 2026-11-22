@@ -39,7 +39,7 @@ class BlackoutDate extends Element
     }
     public static function refHandle(): ?string
     {
-        return 'blackoutDate';
+        return 'bookedBlackoutDate';
     }
     public static function gqlTypeNameByContext(mixed $context): string
     {

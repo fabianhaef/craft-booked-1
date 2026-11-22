@@ -203,7 +203,7 @@ class ServiceExtraTest extends TestCase
 
     public function testRefHandleReturnsServiceExtra(): void
     {
-        $this->assertEquals('serviceExtra', ServiceExtra::refHandle());
+        $this->assertEquals('bookedServiceExtra', ServiceExtra::refHandle());
     }
 
     public function testStatusesContainsEnabledAndDisabled(): void

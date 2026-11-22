@@ -270,7 +270,7 @@ class EmployeeTest extends TestCase
 
     public function testRefHandleReturnsEmployee(): void
     {
-        $this->assertEquals('employee', Employee::refHandle());
+        $this->assertEquals('bookedEmployee', Employee::refHandle());
     }
 
     // =========================================================================

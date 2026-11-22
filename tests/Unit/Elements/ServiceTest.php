@@ -155,7 +155,7 @@ class ServiceTest extends TestCase
 
     public function testRefHandleReturnsService(): void
     {
-        $this->assertEquals('service', Service::refHandle());
+        $this->assertEquals('bookedService', Service::refHandle());
     }
 
     // =========================================================================

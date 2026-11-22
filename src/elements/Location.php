@@ -38,7 +38,7 @@ class Location extends Element
     }
     public static function refHandle(): ?string
     {
-        return 'location';
+        return 'bookedLocation';
     }
     public static function gqlTypeNameByContext(mixed $context): string
     {

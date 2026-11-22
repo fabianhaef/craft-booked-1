@@ -125,7 +125,7 @@ class LocationTest extends TestCase
 
     public function testRefHandleReturnsLocation(): void
     {
-        $this->assertEquals('location', Location::refHandle());
+        $this->assertEquals('bookedLocation', Location::refHandle());
     }
 
     public function testCanDuplicateReturnsTrue(): void

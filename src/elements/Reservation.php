@@ -269,7 +269,7 @@ class Reservation extends Element implements _ReservationPurchasable, Reservatio
     }
     public static function refHandle(): ?string
     {
-        return 'reservation';
+        return 'bookedReservation';
     }
     public static function gqlTypeNameByContext(mixed $context): string
     {

@@ -163,7 +163,7 @@ class Service extends Element
 
     public static function refHandle(): ?string
     {
-        return 'service';
+        return 'bookedService';
     }
 
     public static function gqlTypeNameByContext(mixed $context): string

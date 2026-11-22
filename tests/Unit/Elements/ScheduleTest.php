@@ -183,7 +183,7 @@ class ScheduleTest extends TestCase
 
     public function testRefHandleReturnsSchedule(): void
     {
-        $this->assertEquals('schedule', Schedule::refHandle());
+        $this->assertEquals('bookedSchedule', Schedule::refHandle());
     }
 
     public function testGqlTypeNameReturnsBookedSchedule(): void

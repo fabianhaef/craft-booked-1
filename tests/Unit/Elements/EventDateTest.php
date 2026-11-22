@@ -168,7 +168,7 @@ class EventDateTest extends TestCase
 
     public function testRefHandleReturnsEventDate(): void
     {
-        $this->assertEquals('eventDate', EventDate::refHandle());
+        $this->assertEquals('bookedEventDate', EventDate::refHandle());
     }
 
     public function testStatusesContainsEnabledAndDisabled(): void

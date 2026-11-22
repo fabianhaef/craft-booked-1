@@ -163,7 +163,7 @@ class BlackoutDateTest extends TestCase
 
     public function testRefHandleReturnsBlackoutDate(): void
     {
-        $this->assertEquals('blackoutDate', BlackoutDate::refHandle());
+        $this->assertEquals('bookedBlackoutDate', BlackoutDate::refHandle());
     }
 
     public function testStatusesContainsActiveAndInactive(): void

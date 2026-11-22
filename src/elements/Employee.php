@@ -53,7 +53,7 @@ class Employee extends Element
     }
     public static function refHandle(): ?string
     {
-        return 'employee';
+        return 'bookedEmployee';
     }
     public static function gqlTypeNameByContext(mixed $context): string
     {

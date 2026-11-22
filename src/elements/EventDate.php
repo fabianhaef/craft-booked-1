@@ -82,7 +82,7 @@ class EventDate extends Element
     }
     public static function refHandle(): ?string
     {
-        return 'eventDate';
+        return 'bookedEventDate';
     }
     public static function gqlTypeNameByContext(mixed $context): string
     {

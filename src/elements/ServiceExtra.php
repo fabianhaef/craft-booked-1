@@ -40,7 +40,7 @@ class ServiceExtra extends Element
     }
     public static function refHandle(): ?string
     {
-        return 'serviceExtra';
+        return 'bookedServiceExtra';
     }
     public static function hasTitles(): bool
     {

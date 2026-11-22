@@ -56,7 +56,7 @@ class Schedule extends Element
     }
     public static function refHandle(): ?string
     {
-        return 'schedule';
+        return 'bookedSchedule';
     }
     public static function gqlTypeNameByContext(mixed $context): string
     {
