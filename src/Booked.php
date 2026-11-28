@@ -105,6 +105,7 @@ class Booked extends Plugin
         parent::init();
 
         Craft::setAlias('@booked', $this->getBasePath());
+        Craft::setAlias('@anvildev/booked', $this->getBasePath());
 
         $this->controllerNamespace = Craft::$app instanceof \craft\console\Application
             ? 'anvildev\\booked\\console\\controllers'
