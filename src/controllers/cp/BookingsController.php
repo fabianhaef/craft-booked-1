@@ -13,6 +13,7 @@ use anvildev\booked\elements\Reservation;
 use anvildev\booked\elements\Service;
 use anvildev\booked\factories\ReservationFactory;
 use anvildev\booked\helpers\CsvHelper;
+use anvildev\booked\helpers\ElementBatch;
 use anvildev\booked\helpers\FormFieldHelper;
 use anvildev\booked\records\PaymentRecord;
 use anvildev\booked\records\ReservationRecord;
@@ -617,7 +618,7 @@ class BookingsController extends Controller
         fwrite($handle, "\xEF\xBB\xBF");
         fputcsv($handle, $header);
 
-        foreach ($query->each(100) as $r) {
+        foreach (ElementBatch::each($query, 100) as $r) {
             $service = $r->serviceId ? Service::find()->id($r->serviceId)->one() : null;
             $employee = $r->employeeId ? Employee::find()->siteId('*')->id($r->employeeId)->one() : null;
             $location = $r->locationId ? Location::find()->siteId('*')->id($r->locationId)->one() : null;

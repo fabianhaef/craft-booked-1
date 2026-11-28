@@ -6,7 +6,6 @@ use anvildev\booked\helpers\CsvHelper;
 use Craft;
 use craft\base\ElementExporter;
 use craft\elements\db\ElementQueryInterface;
-use craft\helpers\Db;
 
 class ServiceCatalogCsvExporter extends ElementExporter
 {
@@ -33,7 +32,12 @@ class ServiceCatalogCsvExporter extends ElementExporter
             'Status', 'Created',
         ]);
 
-        foreach (Db::each($query) as $service) {
+        // Craft 6: Db::each()/Db::batch() call createCommand() on the query, a
+        // real Yii method that doesn't exist on Craft 6's native, Laravel-backed
+        // ElementQuery. Element exports run on an already-filtered/selected set,
+        // not the whole table, so plain all() is simpler and dual-compatible
+        // without branching, and the memory tradeoff is fine here.
+        foreach ($query->all() as $service) {
             /** @var \anvildev\booked\elements\Service $service */
             fputcsv($handle, [
                 (string) $service->id,

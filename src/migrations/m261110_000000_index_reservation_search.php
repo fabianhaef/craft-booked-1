@@ -3,6 +3,7 @@
 namespace anvildev\booked\migrations;
 
 use anvildev\booked\elements\Reservation;
+use anvildev\booked\helpers\ElementBatch;
 use Craft;
 use craft\db\Migration;
 
@@ -20,7 +21,7 @@ class m261110_000000_index_reservation_search extends Migration
     {
         $search = Craft::$app->getSearch();
 
-        foreach (Reservation::find()->siteId('*')->each(100) as $reservation) {
+        foreach (ElementBatch::each(Reservation::find()->siteId('*'), 100) as $reservation) {
             $search->indexElementAttributes($reservation);
         }
 
